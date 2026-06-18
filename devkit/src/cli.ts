@@ -5,6 +5,7 @@ import { buildCommand } from './commands/build.js';
 import { runCommand } from './commands/run.js';
 import { input } from '@inquirer/prompts';
 import { makeModel } from './commands/make-model.js';
+import { makeComponent } from './commands/make-component.js';
 import { log } from './util/log.js';
 
 const program = new Command();
@@ -76,6 +77,17 @@ program
         input({ message: 'Fields (name:type, comma-separated; blank for id-only):', default: '' }),
     });
     process.exit(code);
+  });
+
+program
+  .command('make:component <name>')
+  .description('Scaffold a cross-platform component (types + web + native + index)')
+  .option('--mobile-only', 'mobile-only component (web renders a null stub)')
+  .option('--force', 'overwrite existing files')
+  .action(async (name: string, opts: { mobileOnly?: boolean; force?: boolean }) => {
+    process.exit(await makeComponent({
+      name, cwd: process.cwd(), mobileOnly: opts.mobileOnly ?? false, force: opts.force ?? false,
+    }));
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {
