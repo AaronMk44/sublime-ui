@@ -28,7 +28,7 @@ Sublime/
   package.json                 # root: workspaces, fan-out scripts (Task 1)
   tsconfig.base.json           # shared strict TS (Task 1)
   tsconfig.json                # root solution refs / typecheck entry (Task 1)
-  .eslintrc.cjs                # shared lint (Task 1)
+  eslint.config.js             # shared lint, flat config (Task 1)
   .prettierrc.json             # shared format (Task 1)
   .gitignore                   # already present
   framework/
@@ -65,7 +65,7 @@ Sublime/
 - Create: `package.json`
 - Create: `tsconfig.base.json`
 - Create: `tsconfig.json`
-- Create: `.eslintrc.cjs`
+- Create: `eslint.config.js`
 - Create: `.prettierrc.json`
 
 **Interfaces:**
@@ -145,26 +145,33 @@ Sublime/
 }
 ```
 
-- [ ] **Step 4: Create `.eslintrc.cjs`**
+- [ ] **Step 4: Create `eslint.config.js`** (ESLint 9 flat config — `^9` defaults to flat config and does NOT load legacy `.eslintrc.*`)
 
-`.eslintrc.cjs`:
-```cjs
-/* eslint-env node */
-module.exports = {
-  root: true,
-  parser: '@typescript-eslint/parser',
-  parserOptions: { ecmaVersion: 2022, sourceType: 'module' },
-  plugins: ['@typescript-eslint'],
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-  ],
-  ignorePatterns: ['dist/', 'node_modules/', 'sandbox/', '*.cjs'],
-  rules: {
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+`eslint.config.js`:
+```js
+import tsParser from '@typescript-eslint/parser';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import prettier from 'eslint-config-prettier';
+
+export default [
+  { ignores: ['**/dist/', '**/node_modules/', 'sandbox/', '**/*.cjs'] },
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: { ecmaVersion: 2022, sourceType: 'module' },
+    },
+    plugins: { '@typescript-eslint': tsPlugin },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
+    },
   },
-};
+  prettier,
+];
 ```
 
 - [ ] **Step 5: Create `.prettierrc.json`**
@@ -182,7 +189,7 @@ module.exports = {
 - [ ] **Step 6: Commit**
 
 ```bash
-git add package.json tsconfig.base.json tsconfig.json .eslintrc.cjs .prettierrc.json
+git add package.json tsconfig.base.json tsconfig.json eslint.config.js .prettierrc.json
 git commit -m "chore: add monorepo root config (workspaces, strict TS, lint, format)"
 ```
 
@@ -202,7 +209,7 @@ git commit -m "chore: add monorepo root config (workspaces, strict TS, lint, for
 
 - [ ] **Step 1: Create `framework` package files**
 
-`framework/package.json`:
+`framework/package.json` (`--passWithNoTests`: framework/library are stub packages with no test files yet, but the root `npm run test` must still pass per #0 acceptance — bare `vitest run` exits 1 on an empty suite):
 ```json
 {
   "name": "@sublime-ui/framework",
@@ -213,7 +220,7 @@ git commit -m "chore: add monorepo root config (workspaces, strict TS, lint, for
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src"
   }
 }
@@ -258,7 +265,7 @@ export const version = '0.0.0';
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src"
   }
 }
@@ -311,15 +318,20 @@ export const version = '0.0.0';
     "commander": "^12.1.0",
     "execa": "^9.4.0",
     "picocolors": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22"
   }
 }
 ```
 
-`devkit/tsconfig.json`:
+> `@types/node` is required: devkit is the first package to use Node built-ins (`process`, `console`, `node:fs`, `node:path`, `NodeJS.ProcessEnv`). Without it, `tsc` fails with TS2580/TS2584 the moment those APIs appear (Task 6 onward).
+
+`devkit/tsconfig.json` (no `rootDir`: `include` covers both `src` and `test`, and setting `rootDir: src` would make `tsc --noEmit` throw TS6059 once a `test/` file exists; tsup owns the actual build via its own `entry`, so tsc here is typecheck-only):
 ```json
 {
   "extends": "../tsconfig.base.json",
-  "compilerOptions": { "outDir": "dist", "rootDir": "src" },
+  "compilerOptions": { "outDir": "dist" },
   "include": ["src", "test"]
 }
 ```
@@ -796,9 +808,10 @@ export const log = {
   warn: (m: string): void => console.log(pc.yellow(`! ${m}`)),
   error: (m: string): void => console.error(pc.red(`✗ ${m}`)),
   table: (rows: TableRow[]): void => {
+    const width = rows.reduce((m, r) => Math.max(m, r.label.length), 0);
     for (const r of rows) {
       const mark = r.ok ? pc.green('✓') : pc.red('✗');
-      console.log(`${mark} ${r.label.padEnd(12)}  ${pc.dim(r.detail)}`);
+      console.log(`${mark} ${r.label.padEnd(width)}  ${pc.dim(r.detail)}`);
     }
   },
 };
@@ -828,7 +841,7 @@ export async function run(
   opts: RunOptions = {},
 ): Promise<RunResult> {
   const result = await execa(file, args, {
-    cwd: opts.cwd,
+    ...(opts.cwd === undefined ? {} : { cwd: opts.cwd }),
     env: { ...process.env, ...opts.env },
     reject: false,
     all: false,
@@ -847,7 +860,7 @@ export async function runInherit(
   opts: RunOptions = {},
 ): Promise<number> {
   const result = await execa(file, args, {
-    cwd: opts.cwd,
+    ...(opts.cwd === undefined ? {} : { cwd: opts.cwd }),
     env: { ...process.env, ...opts.env },
     stdio: 'inherit',
     reject: false,
@@ -1264,14 +1277,17 @@ export async function ensureComponents(
       rmSync(ndkDir, { recursive: true, force: true });
     }
     log.step(`Installing ${id} …`);
-    // Pipe license acceptance via stdin "y".
     const res = await run(smPath, [`--sdk_root=${androidHome}`, id, '--channel=0'], {
       env,
     });
     if (res.exitCode !== 0) {
-      // accept licenses then retry once
+      // First attempt can fail on unaccepted licenses; accept them then retry once.
       await run(smPath, [`--sdk_root=${androidHome}`, '--licenses'], { env });
-      const retry = await run(smPath, [`--sdk_root=${androidHome}`, id], { env });
+      const retry = await run(
+        smPath,
+        [`--sdk_root=${androidHome}`, id, '--channel=0'],
+        { env },
+      );
       if (retry.exitCode !== 0) {
         throw new Error(`Failed to install ${id}:\n${retry.stderr || retry.stdout}`);
       }
@@ -1289,7 +1305,7 @@ export async function ensureComponents(
 
 `devkit/src/lib/jdk.ts`:
 ```ts
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { run, runInherit } from '../util/exec.js';
@@ -1320,33 +1336,56 @@ export async function ensurePortableJdk17(): Promise<string> {
 
   mkdirSync(sublimeHomeDir(), { recursive: true });
   const zipPath = join(sublimeHomeDir(), 'jdk-17.zip');
+  const tmp = join(sublimeHomeDir(), 'jdk-17-tmp');
+  // Clean leftovers from any prior failed run so we never move a stale dir.
+  rmSync(tmp, { recursive: true, force: true });
+  rmSync(root, { recursive: true, force: true });
+
   log.step('Downloading portable JDK 17 (Temurin)…');
-  // Use PowerShell for download + expand to avoid extra deps.
-  await runInherit('powershell', [
+  // PowerShell for download + expand to avoid extra deps.
+  const dl = await runInherit('powershell', [
     '-NoProfile',
     '-Command',
     `Invoke-WebRequest -Uri '${JDK_DOWNLOAD.windowsX64}' -OutFile '${zipPath}'`,
   ]);
+  if (dl !== 0) {
+    throw new Error('Failed to download JDK 17 (check your network connection).');
+  }
+
   log.step('Extracting JDK 17…');
-  await runInherit('powershell', [
+  const ex = await runInherit('powershell', [
     '-NoProfile',
     '-Command',
-    `Expand-Archive -Path '${zipPath}' -DestinationPath '${join(sublimeHomeDir(), 'jdk-17-tmp')}' -Force`,
+    `Expand-Archive -Path '${zipPath}' -DestinationPath '${tmp}' -Force`,
   ]);
-  // Temurin zip extracts to a versioned subfolder; find the one with bin/java.exe.
-  const tmp = join(sublimeHomeDir(), 'jdk-17-tmp');
-  const inner = (await run('powershell', [
-    '-NoProfile',
-    '-Command',
-    `(Get-ChildItem -Directory '${tmp}' | Select-Object -First 1).FullName`,
-  ])).stdout.trim();
-  await runInherit('powershell', [
+  if (ex !== 0) {
+    throw new Error('Failed to extract the JDK 17 archive.');
+  }
+
+  // Temurin zip extracts to a single versioned top-level folder; move it to root.
+  const inner = (
+    await run('powershell', [
+      '-NoProfile',
+      '-Command',
+      `(Get-ChildItem -Directory '${tmp}' | Select-Object -First 1).FullName`,
+    ])
+  ).stdout.trim();
+  if (inner === '') {
+    throw new Error('JDK 17 archive contained no extracted folder.');
+  }
+  const mv = await runInherit('powershell', [
     '-NoProfile',
     '-Command',
     `Move-Item -Path '${inner}' -Destination '${root}' -Force`,
   ]);
+  if (mv !== 0) {
+    throw new Error('Failed to move the extracted JDK 17 into place.');
+  }
+
+  rmSync(tmp, { recursive: true, force: true });
+  rmSync(zipPath, { force: true });
   if (!existsSync(marker)) {
-    throw new Error('Portable JDK 17 extraction failed.');
+    throw new Error('Portable JDK 17 install incomplete (java.exe missing).');
   }
   return root;
 }
@@ -1853,17 +1892,21 @@ export async function buildCommand(opts: {
   ensureLocalProperties(opts.project, androidHome);
   const jdk17Home = await ensurePortableJdk17();
 
-  // 3. Scoped, self-healing Gradle build.
+  // 3. Scoped, self-healing Gradle build. runGradleWithHealing resolves on
+  //    success and THROWS on failure (after bounded retries / unrecoverable
+  //    error); the throw propagates to the CLI's top-level catch → exit 1.
   const task = gradleTaskFor({ release: opts.release, aab: opts.aab });
   await runGradleWithHealing({ androidDir, task, jdk17Home, androidHome });
 
-  // 4. Report artifact.
+  // 4. Report artifact. (Reached only when the build succeeded.)
   if (!opts.aab) {
     const apk = findReleaseApk(opts.project);
-    if (apk !== null && existsSync(apk)) {
-      const mb = (statSync(apk).size / (1024 * 1024)).toFixed(1);
-      log.success(`APK ready: ${apk} (${mb} MB)`);
+    if (apk === null) {
+      log.error('Build reported success but no release APK was found.');
+      return 1;
     }
+    const mb = (statSync(apk).size / (1024 * 1024)).toFixed(1);
+    log.success(`APK ready: ${apk} (${mb} MB)`);
   } else {
     log.success('AAB built under android/app/build/outputs/bundle/release/.');
   }
@@ -1985,7 +2028,15 @@ program
   .option('--device <id>', 'adb device serial')
   .option('--project <path>', 'project directory', process.cwd())
   .action(async (opts: { device?: string; project: string }) => {
-    process.exit(await runCommand({ project: opts.project, device: opts.device }));
+    // Omit `device` when undefined: exactOptionalPropertyTypes rejects
+    // passing `device: undefined` to runCommand's `device?: string`.
+    process.exit(
+      await runCommand(
+        opts.device === undefined
+          ? { project: opts.project }
+          : { project: opts.project, device: opts.device },
+      ),
+    );
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {
@@ -2216,3 +2267,40 @@ git commit -m "test: verify devkit reproduces signed DemoApp APK end-to-end"
 - **Known cross-task coupling:** `run.ts` (Task 11) imports `readAndroidPackageId`/`findReleaseApk` from `build.ts` (Task 12); flagged in both tasks. Typecheck is green only after Task 12 — Task 11 Step 5 calls this out.
 - **Type consistency:** `Probes`/`DoctorReport`/`TableRow`/`GradleRunResult`/`HealingOptions` names are used identically across producing and consuming tasks. `gradleTaskFor`, `findReleaseApk`, `readAndroidPackageId`, `ensureLocalProperties` signatures match between Tasks 11 and 12.
 - **No placeholders:** every code step contains real code; no TODO/TBD.
+
+---
+
+## Post-implementation amendments
+
+Deltas applied during execution (review-driven and smoke-test-driven). The
+inline task code above predates these; the committed source is authoritative.
+
+- **ESLint 9 flat config** (`eslint.config.js`) instead of legacy `.eslintrc.cjs`
+  — ESLint 9 defaults to flat config and ignores eslintrc.
+- **`@types/node`** added to devkit devDependencies (first package to use
+  Node built-ins); without it `tsc` throws TS2580/TS2584.
+- **devkit `tsconfig.json`** drops `rootDir` — with `include: [src, test]` a
+  `rootDir: src` makes `tsc --noEmit` throw TS6059 once a test file exists.
+- **`exec.ts`** passes `cwd` via conditional spread (omit-when-undefined) for
+  `exactOptionalPropertyTypes`; same pattern for `cli.ts` `run --device`.
+- **`log.table`** computes column width dynamically (17-char NDK label).
+- **`jdk.ts` `ensurePortableJdk17`** hardened: cleans stale `jdk-17-tmp`/`root`
+  before extract, checks download/extract/move exit codes, guards empty inner dir.
+- **`gradle.ts` `gradlewPath`** returns an **absolute** `resolve()` path and the
+  runner uses an absolute cwd — a relative gradlew spawned with `cwd=androidDir`
+  is re-resolved against the child cwd on Windows → "The system cannot find the
+  path specified." (found by the Task 15 smoke test).
+- **`build.ts`** APK/AAB discovery is variant-aware: `findApk(projectDir,
+  variant)` (`release`→`app-release.apk`, `debug`→`app-debug.apk`) and
+  `findAab(projectDir)`; `buildCommand` returns non-zero if the expected
+  artifact is missing after a successful Gradle run. `run.ts` finds release then
+  falls back to debug.
+- **framework/library `test` scripts** use `vitest run --passWithNoTests` so the
+  root `npm run test` passes with empty stub packages (#0 acceptance).
+
+**Verification:** full monorepo gate green (root typecheck, `eslint .
+--max-warnings=0`, 41 unit tests, build). End-to-end smoke on real hardware:
+`doctor` → `build` (signed 64.4 MB standalone `app-release.apk`; portable JDK 17
+Adoptium 17.0.13 + NDK r27b + CMake 3.22.1, 4 ABIs) → `run` (installed + launched
+`com.demo.demoapp`, MainActivity resumed, no crash). `--aab` produces a Play
+Store `app-release.aab`.
