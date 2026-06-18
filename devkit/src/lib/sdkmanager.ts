@@ -51,14 +51,17 @@ export async function ensureComponents(
       rmSync(ndkDir, { recursive: true, force: true });
     }
     log.step(`Installing ${id} …`);
-    // Pipe license acceptance via stdin "y".
     const res = await run(smPath, [`--sdk_root=${androidHome}`, id, '--channel=0'], {
       env,
     });
     if (res.exitCode !== 0) {
-      // accept licenses then retry once
+      // First attempt can fail on unaccepted licenses; accept them then retry once.
       await run(smPath, [`--sdk_root=${androidHome}`, '--licenses'], { env });
-      const retry = await run(smPath, [`--sdk_root=${androidHome}`, id], { env });
+      const retry = await run(
+        smPath,
+        [`--sdk_root=${androidHome}`, id, '--channel=0'],
+        { env },
+      );
       if (retry.exitCode !== 0) {
         throw new Error(`Failed to install ${id}:\n${retry.stderr || retry.stdout}`);
       }

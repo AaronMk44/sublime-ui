@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { run, runInherit } from '../util/exec.js';
@@ -29,33 +29,56 @@ export async function ensurePortableJdk17(): Promise<string> {
 
   mkdirSync(sublimeHomeDir(), { recursive: true });
   const zipPath = join(sublimeHomeDir(), 'jdk-17.zip');
+  const tmp = join(sublimeHomeDir(), 'jdk-17-tmp');
+  // Clean leftovers from any prior failed run so we never move a stale dir.
+  rmSync(tmp, { recursive: true, force: true });
+  rmSync(root, { recursive: true, force: true });
+
   log.step('Downloading portable JDK 17 (Temurin)…');
-  // Use PowerShell for download + expand to avoid extra deps.
-  await runInherit('powershell', [
+  // PowerShell for download + expand to avoid extra deps.
+  const dl = await runInherit('powershell', [
     '-NoProfile',
     '-Command',
     `Invoke-WebRequest -Uri '${JDK_DOWNLOAD.windowsX64}' -OutFile '${zipPath}'`,
   ]);
+  if (dl !== 0) {
+    throw new Error('Failed to download JDK 17 (check your network connection).');
+  }
+
   log.step('Extracting JDK 17…');
-  await runInherit('powershell', [
+  const ex = await runInherit('powershell', [
     '-NoProfile',
     '-Command',
-    `Expand-Archive -Path '${zipPath}' -DestinationPath '${join(sublimeHomeDir(), 'jdk-17-tmp')}' -Force`,
+    `Expand-Archive -Path '${zipPath}' -DestinationPath '${tmp}' -Force`,
   ]);
-  // Temurin zip extracts to a versioned subfolder; find the one with bin/java.exe.
-  const tmp = join(sublimeHomeDir(), 'jdk-17-tmp');
-  const inner = (await run('powershell', [
-    '-NoProfile',
-    '-Command',
-    `(Get-ChildItem -Directory '${tmp}' | Select-Object -First 1).FullName`,
-  ])).stdout.trim();
-  await runInherit('powershell', [
+  if (ex !== 0) {
+    throw new Error('Failed to extract the JDK 17 archive.');
+  }
+
+  // Temurin zip extracts to a single versioned top-level folder; move it to root.
+  const inner = (
+    await run('powershell', [
+      '-NoProfile',
+      '-Command',
+      `(Get-ChildItem -Directory '${tmp}' | Select-Object -First 1).FullName`,
+    ])
+  ).stdout.trim();
+  if (inner === '') {
+    throw new Error('JDK 17 archive contained no extracted folder.');
+  }
+  const mv = await runInherit('powershell', [
     '-NoProfile',
     '-Command',
     `Move-Item -Path '${inner}' -Destination '${root}' -Force`,
   ]);
+  if (mv !== 0) {
+    throw new Error('Failed to move the extracted JDK 17 into place.');
+  }
+
+  rmSync(tmp, { recursive: true, force: true });
+  rmSync(zipPath, { force: true });
   if (!existsSync(marker)) {
-    throw new Error('Portable JDK 17 extraction failed.');
+    throw new Error('Portable JDK 17 install incomplete (java.exe missing).');
   }
   return root;
 }
