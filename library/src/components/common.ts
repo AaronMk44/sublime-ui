@@ -5,5 +5,6 @@ export type Size = 'sm' | 'md' | 'lg';
 export interface NavItem {
   key: string;
   label: string;
-  icon?: string;
+  icon: string;
+  badge?: string | number;
 }
