@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   readAndroidPackageId,
-  findReleaseApk,
+  findApk,
   ensureLocalProperties,
   gradleTaskFor,
 } from '../src/commands/build.js';
@@ -46,18 +46,27 @@ describe('ensureLocalProperties', () => {
   });
 });
 
-describe('findReleaseApk', () => {
+describe('findApk', () => {
   let dir = '';
   beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'proj-')); });
   afterEach(() => { rmSync(dir, { recursive: true, force: true }); });
 
-  it('returns null when no apk', () => {
-    expect(findReleaseApk(dir)).toBeNull();
+  it('returns null when no apk for either variant', () => {
+    expect(findApk(dir, 'release')).toBeNull();
+    expect(findApk(dir, 'debug')).toBeNull();
   });
-  it('returns the path when the apk exists', () => {
+  it('finds the release apk', () => {
     const apkDir = join(dir, 'android', 'app', 'build', 'outputs', 'apk', 'release');
     mkdirSync(apkDir, { recursive: true });
     writeFileSync(join(apkDir, 'app-release.apk'), 'x');
-    expect(existsSync(findReleaseApk(dir) ?? '')).toBe(true);
+    expect(existsSync(findApk(dir, 'release') ?? '')).toBe(true);
+    expect(findApk(dir, 'debug')).toBeNull();
+  });
+  it('finds the debug apk', () => {
+    const apkDir = join(dir, 'android', 'app', 'build', 'outputs', 'apk', 'debug');
+    mkdirSync(apkDir, { recursive: true });
+    writeFileSync(join(apkDir, 'app-debug.apk'), 'x');
+    expect(existsSync(findApk(dir, 'debug') ?? '')).toBe(true);
+    expect(findApk(dir, 'release')).toBeNull();
   });
 });

@@ -17,7 +17,7 @@ offline** — no EAS / cloud build. Bin names: `sublime` (alias `sui`).
 |---|---|
 | `sublime doctor` | Prints a ✓/✗ table for Node, JDK 17, `ANDROID_HOME`, cmdline-tools, platform-tools, NDK 27.1.12297006, CMake 3.22.1. Exits non-zero if a required piece is missing. |
 | `sublime setup` | Windows: installs a **portable Temurin JDK 17** into `~/.sublime/` (no admin; your system Java is untouched). macOS/Linux: prints guided steps. |
-| `sublime build [--release\|--debug] [--aab] [--project <path>]` | Runs `expo prebuild` if `android/` is absent, writes `local.properties`, then runs Gradle with a **scoped JDK 17** and self-heals missing NDK/CMake. Default = `assembleRelease`. |
+| `sublime build [--release\|--debug] [--aab] [--project <path>]` | Runs `expo prebuild` if `android/` is absent, writes `local.properties`, then runs Gradle with a **scoped JDK 17** and self-heals missing NDK/CMake. Default = `assembleRelease`. Note: `--debug` produces a Metro-dependent APK (not offline); `--release` is the offline default. |
 | `sublime run [--device <id>] [--project <path>]` | `adb install -r` the APK and launches it. |
 
 ## Robustness (lessons baked in)

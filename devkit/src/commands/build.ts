@@ -19,10 +19,16 @@ export function readAndroidPackageId(appJsonPath: string): string | null {
   return json.expo?.android?.package ?? null;
 }
 
-export function findReleaseApk(projectDir: string): string | null {
+export type BuildVariant = 'release' | 'debug';
+
+export function findApk(
+  projectDir: string,
+  variant: BuildVariant,
+): string | null {
+  const file = variant === 'release' ? 'app-release.apk' : 'app-debug.apk';
   const p = join(
     projectDir,
-    'android', 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk',
+    'android', 'app', 'build', 'outputs', 'apk', variant, file,
   );
   return existsSync(p) ? p : null;
 }
@@ -73,9 +79,10 @@ export async function buildCommand(opts: {
 
   // 4. Report artifact. (Reached only when the build succeeded.)
   if (!opts.aab) {
-    const apk = findReleaseApk(opts.project);
+    const variant: BuildVariant = opts.release ? 'release' : 'debug';
+    const apk = findApk(opts.project, variant);
     if (apk === null) {
-      log.error('Build reported success but no release APK was found.');
+      log.error(`Build reported success but no ${variant} APK was found.`);
       return 1;
     }
     const mb = (statSync(apk).size / (1024 * 1024)).toFixed(1);

@@ -1,16 +1,16 @@
-import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { listDevices, installApk, launchActivity } from '../lib/android.js';
-import { readAndroidPackageId, findReleaseApk } from './build.js';
+import { readAndroidPackageId, findApk } from './build.js';
 import { log } from '../util/log.js';
 
 export async function runCommand(opts: {
   project: string;
   device?: string;
 }): Promise<number> {
-  const apk = findReleaseApk(opts.project);
-  if (apk === null || !existsSync(apk)) {
-    log.error('No release APK found. Run: sublime build');
+  const apk =
+    findApk(opts.project, 'release') ?? findApk(opts.project, 'debug');
+  if (apk === null) {
+    log.error('No APK found. Run: sublime build');
     return 1;
   }
   const devices = await listDevices();
