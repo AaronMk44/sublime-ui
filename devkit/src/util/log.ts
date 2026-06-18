@@ -24,9 +24,10 @@ export const log = {
   warn: (m: string): void => console.log(pc.yellow(`! ${m}`)),
   error: (m: string): void => console.error(pc.red(`✗ ${m}`)),
   table: (rows: TableRow[]): void => {
+    const width = rows.reduce((m, r) => Math.max(m, r.label.length), 0);
     for (const r of rows) {
       const mark = r.ok ? pc.green('✓') : pc.red('✗');
-      console.log(`${mark} ${r.label.padEnd(12)}  ${pc.dim(r.detail)}`);
+      console.log(`${mark} ${r.label.padEnd(width)}  ${pc.dim(r.detail)}`);
     }
   },
 };
