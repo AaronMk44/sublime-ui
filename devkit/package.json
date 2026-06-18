@@ -22,6 +22,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
     "commander": "^12.1.0",
     "execa": "^9.4.0",
     "picocolors": "^1.1.0"

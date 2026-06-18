@@ -20,6 +20,19 @@ offline** — no EAS / cloud build. Bin names: `sublime` (alias `sui`).
 | `sublime build [--release\|--debug] [--aab] [--project <path>]` | Runs `expo prebuild` if `android/` is absent, writes `local.properties`, then runs Gradle with a **scoped JDK 17** and self-heals missing NDK/CMake. Default = `assembleRelease`. Note: `--debug` produces a Metro-dependent APK (not offline); `--release` is the offline default. `--aab` produces a Play Store App Bundle (`.aab`, via bundleRelease). |
 | `sublime run [--device <id>] [--project <path>]` | `adb install -r` the APK and launches it. |
 
+## Code generators
+
+Scaffold code matching the Sublime UI framework/library conventions. Paths come
+from `sublime.config.json` (defaults: `src/models`, `src/components`, `src/theme`).
+
+| Command | Generates |
+|---|---|
+| `sublime make:model <Name> [--fields "a:string,b:number"] [--resource /path] [--force]` | `models/<Name>.ts` (Model + `declare` fields + `registerModel`) + barrel. No `--fields` → interactive prompts. |
+| `sublime make:component <Name> [--mobile-only] [--force]` | `components/<Name>/` quartet (`types`/`tsx`/`native.tsx`/`index`) + barrel. `--mobile-only` → web null stub. |
+| `sublime theme:init [--force]` | `theme/tokens.json` (= library defaults) + a typed `theme/tokens.ts` wrapper. |
+
+Generators never overwrite without `--force`; barrel updates are idempotent.
+
 ## Robustness (lessons baked in)
 
 - **Self-healing SDK installs.** On `Failed to install … ndk;X / cmake;Y`, the id
