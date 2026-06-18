@@ -6,6 +6,7 @@ import { runCommand } from './commands/run.js';
 import { input } from '@inquirer/prompts';
 import { makeModel } from './commands/make-model.js';
 import { makeComponent } from './commands/make-component.js';
+import { themeInit } from './commands/theme-init.js';
 import { log } from './util/log.js';
 
 const program = new Command();
@@ -88,6 +89,14 @@ program
     process.exit(await makeComponent({
       name, cwd: process.cwd(), mobileOnly: opts.mobileOnly ?? false, force: opts.force ?? false,
     }));
+  });
+
+program
+  .command('theme:init')
+  .description('Scaffold the app design tokens (tokens.json + typed wrapper)')
+  .option('--force', 'overwrite existing files')
+  .action(async (opts: { force?: boolean }) => {
+    process.exit(await themeInit({ cwd: process.cwd(), force: opts.force ?? false }));
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {
