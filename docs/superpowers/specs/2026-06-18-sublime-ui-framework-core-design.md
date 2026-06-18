@@ -40,7 +40,7 @@ method, ~50-line hand-written slices).
 
 | Term | Role |
 |---|---|
-| **`Model`** | Base class. A *parent/aggregate* entity (e.g. `Sale`, `User`) extends it. Owns `fillable` + `resource`, exposes CRUD + reactive reads + custom calls. |
+| **`Model`** | Base class. A *parent/aggregate* entity (e.g. `Sale`, `User`) extends it. Owns a `static schema` (fields + types in one block) + `resource`, exposes CRUD + reactive reads + custom calls. |
 | **value type** | A *child* entity (e.g. `SaleItem`) stays a plain `interface` — just a data shape, no Model, no Gateway, no slice. |
 | **`Gateway`** | Generated, **API-only** layer: CRUD methods over the fetch-based HTTP client. Its only job is HTTP. (`UserGateway`.) This is the renamed data-access layer. |
 | **`Service`** | **Reserved** for optional, hand-written **business logic** (cross-model orchestration). Never required by the framework. |
@@ -51,26 +51,27 @@ method, ~50-line hand-written slices).
 
 ### 3.1 Defining a model
 
+Fields and their types are declared **once**, together, in a `static schema`
+block. `t<T>()` is a zero-runtime phantom: the object **key** is the persisted
+field name, the **generic** is the field's type.
+
 ```ts
-import { Model } from '@sublime-ui/framework';
+import { Model, t, type Infer } from '@sublime-ui/framework';
 import type { SaleItem } from './SaleItem'; // value type, plain interface
 
-export class Sale extends Model<Sale> {
+export class Sale extends Model {
   protected static resource = '/sales';
-  protected static fillable = [
-    'id', 'storeId', 'total', 'createdAt', 'items',
-  ] as const;
-
-  // typed fields (declared for TS; hydrated by the framework from fillable)
-  declare id: number;
-  declare storeId: number;
-  declare total: number;
-  declare createdAt: string;
-  declare items: SaleItem[];
+  protected static schema = {
+    id:        t<number>(),
+    storeId:   t<number>(),
+    total:     t<number>(),
+    createdAt: t<string>(),
+    items:     t<SaleItem[]>(),   // arrays / custom types are fine
+  } as const;
 
   // custom getter — computed on the instance, never stored
   get isLarge(): boolean {
-    return this.total > 1000;
+    return this.total > 1000;     // this.total: number ✓
   }
 
   // custom data call: declare URL + whether the result lands in Redux
@@ -81,14 +82,24 @@ export class Sale extends Model<Sale> {
     return this.call<ReportDto>({ url: `/sales/report/${storeId}`, store: false });
   }
 }
+// Companion line: merges the inferred field types onto the instance.
+// `sublime make:model` (#3) writes this automatically; hand-written models add it once.
+export interface Sale extends Infer<typeof Sale.schema> {}
 ```
 
 - **`resource`** — the RESTful base path; the `Gateway`'s CRUD endpoints derive
   from it (`GET /sales`, `GET /sales/:id`, `POST /sales`, `PUT /sales/:id`,
   `DELETE /sales/:id`).
-- **`fillable`** — the persisted field names. **Only fillable fields are cast to
-  the store.** Getters and non-fillable instance state are never persisted.
-- A model is `Model<Self>` so `rx`/collection helpers return the right type.
+- **`schema`** — the single source of fields + types. Runtime
+  `fillable = Object.keys(schema)`; **only schema fields are cast to the store**.
+  Getters and non-schema instance state are never persisted.
+- **`t<T>()`** — phantom type marker (no runtime cost). **`Infer<typeof X.schema>`**
+  maps the schema to `{ field: Type }` for the companion `interface` merge.
+- A class's `static` members cannot type `this`, which is why the one-line
+  `interface Sale extends Infer<typeof Sale.schema> {}` is required for
+  `this.total` to be typed inside getters/methods. Static methods (`all`, `find`,
+  `rxAll`, …) return the subclass via polymorphic `this` typing — no generic
+  parameter on `Model` is needed.
 
 ### 3.2 Commands (imperative, async, throw `ApiError`)
 
@@ -147,9 +158,10 @@ caller without touching Redux**. CRUD methods are thin wrappers over `call`.
 ```
 framework/src/
   model/
-    Model.ts            # base class: fillable, resource, CRUD, call(), rx hooks, casting
+    Model.ts            # base class: schema, resource, CRUD, call(), rx hooks, casting
+    schema.ts           # t<T>() phantom marker + Infer<> mapped type
     ModelCollection.ts  # array-like + where/sortBy/find + loading/error/refetch
-    cast.ts             # fillable ⇄ plain JSON ⇄ instance (pure)
+    cast.ts             # schema fields ⇄ plain JSON ⇄ instance (pure)
   gateway/
     Gateway.ts          # base CRUD gateway over the HTTP client (resource → endpoints)
     http.ts             # fetch wrapper: baseURL + auth + JSON + ApiResponse parse
@@ -165,14 +177,15 @@ framework/src/
     Config.ts           # injected: baseURL, tokenProvider, storageAdapter, platform
   entities/
     ApiResponse.ts      # { success, message, data, errors }
-  index.ts              # public exports (Model, Config, types, store bootstrap)
+  index.ts              # public exports (Model, t, Infer, Config, ApiError, store bootstrap)
 ```
 
 ### 4.1 Casting (`cast.ts`) — keeps Redux serializable
 
-- `toPlain(model, fillable)` → a plain object of just the fillable fields (what
-  the store holds).
-- `hydrate(ModelClass, plain)` → a new instance with fillable fields assigned;
+- `fillable(ModelClass)` → `Object.keys(schema)`, the persisted field names.
+- `toPlain(model)` → a plain object of just the schema fields (what the store
+  holds).
+- `hydrate(ModelClass, plain)` → a new instance with schema fields assigned;
   getters/methods come from the prototype.
 - **Redux only ever stores `toPlain` output.** Instances are ephemeral views
   created on read. This satisfies Redux's serializable-state contract and keeps
@@ -263,8 +276,9 @@ registry, `Config`, `ApiResponse`. Hand-written-model path works end to end.
 ## 8. Testing
 
 TDD on the pure/deterministic units, fed realistic inputs:
-- `cast.ts` — `toPlain`/`hydrate` round-trips; fillable filtering; getters not
-  persisted; **no class instance reaches the store** (assert on dispatched payloads).
+- `schema.ts` / `cast.ts` — `t<T>()`/`Infer<>` type behavior; `toPlain`/`hydrate`
+  round-trips; `fillable = Object.keys(schema)` filtering; getters not persisted;
+  **no class instance reaches the store** (assert on dispatched payloads).
 - `ModelCollection` — `where`/`whereIn`/`sortBy`/`find`/`first` over fixtures.
 - `createModelSlice` — `setItems`/`upsert`/`remove`/`setActive`/status/error.
 - `registry` (store + discovery) — register/lookup; `replaceReducer` injection.
@@ -281,7 +295,8 @@ layer is the integration proof, mirroring how #1 used `sandbox/DemoApp`.
 
 ## 9. Acceptance criteria
 
-- A hand-written `User extends Model` with `fillable` + `resource` supports:
+- A hand-written `User extends Model` with a `static schema` + `resource` (and
+  the companion `interface User extends Infer<typeof User.schema> {}`) supports:
   `User.all()`, `User.find()`, `save()`, `delete()`, a custom `store:true` call,
   and a custom `store:false` passthrough — all typed, all `ApiError`-rejecting.
 - `User.rxAll()`/`rxFind()` return hydrated instances reactively, fetch on
