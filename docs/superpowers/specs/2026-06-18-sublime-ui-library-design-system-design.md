@@ -144,7 +144,7 @@ import { SublimeProvider } from '@sublime-ui/library';
 
 ## 6. Component conventions
 
-Every one of the 18 components:
+Every one of the 20 components:
 - has `X.types.ts` (shared prop interface) imported by both platform files →
   **identical API**;
 - shares common props where meaningful: `variant` (`solid | soft | outline |
@@ -155,7 +155,27 @@ Every one of the 18 components:
   defaults);
 - is self-contained and independently testable (the unit of the #4 fan-out).
 
-### The 18 components
+### Mobile-only components
+
+`BottomNav` and `Drawer` are **mobile-only**. To preserve the single-import
+model and type safety, each still ships three files:
+- `X.types.ts` — the shared props;
+- `X.native.tsx` — the real Paper/RN implementation;
+- `X.tsx` (web) — a **stub** that renders `null` and emits a dev-only warning
+  (`"<X> is mobile-only and renders nothing on web"`).
+
+So shared screen code can reference them without crashing on web (they no-op),
+and types stay enforced. They are **presentation-only and navigation-agnostic**:
+they render the glass bar / drawer panel given `items`, an `activeKey`, and
+`onSelect` — the app plugs them into its navigation (e.g. React Navigation's
+`tabBar` / `drawerContent` render props). **React Navigation is NOT a library
+dependency.** Shared nav item shape: `interface NavItem { key: string; label:
+string; icon: string; badge?: string | number }`; `Drawer` additionally accepts
+optional `header` and `footer` slots.
+
+### The 20 components
+
+Cross-platform (web + mobile):
 
 | # | Component | Mobile (Paper) base | Web (MUI) base |
 |---|---|---|---|
@@ -177,6 +197,13 @@ Every one of the 18 components:
 | 16 | Tooltip | `Tooltip` | `Tooltip` |
 | 17 | Checkbox | `Checkbox` | `Checkbox` |
 | 18 | Switch | `Switch` | `Switch` |
+
+Mobile-only (web = stub):
+
+| # | Component | Mobile (Paper/RN) base | Web |
+|---|---|---|---|
+| 19 | BottomNav | styled bar over Paper primitives | stub (renders null) |
+| 20 | Drawer | custom glass drawer panel (per Gulani `StoreDrawerContent`) | stub (renders null) |
 
 `Icon` wraps an icon *slot/name* prop — the library does **not** bundle an icon
 set (the app supplies icons via Paper's icon system / an MUI icon node).
@@ -208,8 +235,9 @@ set (the app supplies icons via Paper's icon system / an MUI icon node).
 ## 9. Scope & future (YAGNI)
 
 **In #4 v1:** the token contract + `defaultTokens` (light+dark), `generateThemes`,
-`SublimeProvider` (+`useTokens`), and the 18 components above with the glass
-default. Platform-resolved delivery that a consumer's Metro/Vite can bundle.
+`SublimeProvider` (+`useTokens`), and the 20 components above (18 cross-platform
++ `BottomNav`/`Drawer` mobile-only with web stubs) with the glass default.
+Platform-resolved delivery that a consumer's Metro/Vite can bundle.
 
 **Out of scope (future):**
 - **devkit-server theme customizer** — a visual editor that drives `tokens`
@@ -227,10 +255,13 @@ default. Platform-resolved delivery that a consumer's Metro/Vite can bundle.
   via `useTokens()`; `mode` toggles light/dark.
 - `generateThemes(defaultTokens, mode)` returns a valid Paper `MD3Theme` and MUI
   `Theme` (unit-tested mapping).
-- All 18 components exist with a shared `X.types.ts`, a web (`X.tsx`) and a
-  mobile (`X.native.tsx`) implementation behind one `@sublime-ui/library` import,
-  each honoring `variant`/`tone`/`size` where applicable and defaulting to glass.
+- All 20 components exist with a shared `X.types.ts` behind one
+  `@sublime-ui/library` import: 18 with a web (`X.tsx`) + mobile (`X.native.tsx`)
+  implementation, and `BottomNav`/`Drawer` with a mobile impl + a web stub that
+  renders null and dev-warns. Each cross-platform component honors
+  `variant`/`tone`/`size` where applicable and defaults to glass.
 - Web components pass render smoke tests; every file typechecks; native
-  components mount under the Paper provider.
+  components (incl. the two mobile-only) mount under the Paper provider; the web
+  stubs render null without throwing.
 - `npm run typecheck`, `lint`, `test`, `build` green across the monorepo; the
   build preserves the `.native`/web split for consumer bundlers.
