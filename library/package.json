@@ -3,11 +3,41 @@
   "version": "0.0.0",
   "type": "module",
   "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist"],
+  "react-native": "./src/index.ts",
+  "files": ["dist", "src"],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "lint": "eslint src"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-native": ">=0.74",
+    "react-native-paper": ">=5",
+    "@mui/material": ">=6",
+    "@emotion/react": ">=11",
+    "@emotion/styled": ">=11"
+  },
+  "peerDependenciesMeta": {
+    "react-native": { "optional": true },
+    "react-native-paper": { "optional": true },
+    "@mui/material": { "optional": true },
+    "@emotion/react": { "optional": true },
+    "@emotion/styled": { "optional": true }
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^6.1.6",
+    "@testing-library/react": "^16.0.1",
+    "@types/node": "^22",
+    "@types/react": "^18.3.12",
+    "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-native": "^0.76.1",
+    "react-native-paper": "^5.12.5",
+    "react-test-renderer": "^18.3.1"
   }
 }
