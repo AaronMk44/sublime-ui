@@ -3,6 +3,8 @@ import { doctorCommand } from './commands/doctor.js';
 import { setupCommand } from './commands/setup.js';
 import { buildCommand } from './commands/build.js';
 import { runCommand } from './commands/run.js';
+import { input } from '@inquirer/prompts';
+import { makeModel } from './commands/make-model.js';
 import { log } from './util/log.js';
 
 const program = new Command();
@@ -55,6 +57,25 @@ program
           : { project: opts.project, device: opts.device },
       ),
     );
+  });
+
+program
+  .command('make:model <name>')
+  .description('Scaffold a Model (+ registerModel) for the framework')
+  .option('--fields <spec>', 'fields, e.g. "name:string, tags:Tag[]"')
+  .option('--resource <path>', 'override the REST resource path')
+  .option('--force', 'overwrite existing files')
+  .action(async (name: string, opts: { fields?: string; resource?: string; force?: boolean }) => {
+    const code = await makeModel({
+      name,
+      cwd: process.cwd(),
+      force: opts.force ?? false,
+      ...(opts.fields ? { fields: opts.fields } : {}),
+      ...(opts.resource ? { resource: opts.resource } : {}),
+      promptFields: () =>
+        input({ message: 'Fields (name:type, comma-separated; blank for id-only):', default: '' }),
+    });
+    process.exit(code);
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {
