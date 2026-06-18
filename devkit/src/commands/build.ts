@@ -65,17 +65,21 @@ export async function buildCommand(opts: {
   ensureLocalProperties(opts.project, androidHome);
   const jdk17Home = await ensurePortableJdk17();
 
-  // 3. Scoped, self-healing Gradle build.
+  // 3. Scoped, self-healing Gradle build. runGradleWithHealing resolves on
+  //    success and THROWS on failure (after bounded retries / unrecoverable
+  //    error); the throw propagates to the CLI's top-level catch → exit 1.
   const task = gradleTaskFor({ release: opts.release, aab: opts.aab });
   await runGradleWithHealing({ androidDir, task, jdk17Home, androidHome });
 
-  // 4. Report artifact.
+  // 4. Report artifact. (Reached only when the build succeeded.)
   if (!opts.aab) {
     const apk = findReleaseApk(opts.project);
-    if (apk !== null && existsSync(apk)) {
-      const mb = (statSync(apk).size / (1024 * 1024)).toFixed(1);
-      log.success(`APK ready: ${apk} (${mb} MB)`);
+    if (apk === null) {
+      log.error('Build reported success but no release APK was found.');
+      return 1;
     }
+    const mb = (statSync(apk).size / (1024 * 1024)).toFixed(1);
+    log.success(`APK ready: ${apk} (${mb} MB)`);
   } else {
     log.success('AAB built under android/app/build/outputs/bundle/release/.');
   }
