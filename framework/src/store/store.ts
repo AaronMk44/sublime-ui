@@ -17,7 +17,10 @@ export const store = configureStore({
   // serializable check on that single path rather than store class instances.
   middleware: (getDefault) =>
     getDefault({
-      serializableCheck: { ignoredPaths: ['*.error'] },
+      serializableCheck: {
+        ignoredPaths: [/\.error$/],
+        ignoredActionPaths: [/^payload$/, /\.error$/],
+      },
     }),
 });
 
