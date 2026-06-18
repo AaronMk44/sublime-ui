@@ -38,8 +38,13 @@ library/src/
   provider/
     TokenContext.ts      # React context holding the active resolved tokens
     useTokens.ts         # () => SublimeTokens (current mode) — platform-agnostic
-    SublimeProvider.tsx          # web: MUI ThemeProvider + CssBaseline + TokenContext
-    SublimeProvider.native.tsx   # mobile: Paper Provider + TokenContext
+    SublimeProvider.tsx          # web: MUI ThemeProvider + CssBaseline + TokenContext + NotificationHost
+    SublimeProvider.native.tsx   # mobile: Paper Provider + TokenContext + NotificationHost
+  notifications/
+    NotificationContext.ts       # platform-agnostic: queue state + notify/dismiss
+    useNotify.ts                 # () => { notify, success, error, warning, info, dismiss }
+    NotificationHost.tsx         # web: MUI Snackbar + Alert stack
+    NotificationHost.native.tsx  # mobile: Paper Snackbar (queued)
   components/
     Button/
       Button.types.ts    # shared ButtonProps (typed once)
@@ -142,6 +147,38 @@ import { SublimeProvider } from '@sublime-ui/library';
 - `tokens` defaults to `defaultTokens`; passing custom tokens overrides them —
   the seam the devkit-server will eventually drive. `mode` selects light/dark.
 
+## 5b. Notifications (unified in-app)
+
+One API, two native renderers — abstracts the mobile Paper `Snackbar` and the
+web MUI `Snackbar`/`Alert` (the role Gulani's web `useNotifications`/Toolpad
+plays today) behind a single hook.
+
+- **Platform-agnostic core** (`NotificationContext.ts`): holds the notification
+  **queue** and `notify(message, opts)` / `dismiss(id)`. A notification is
+  `{ id: string; message: string; tone: 'success'|'error'|'warning'|'info'|'neutral'; duration?: number; action?: { label: string; onPress: () => void } }`.
+  Self-contained React state — **does NOT depend on framework #2's Redux**, so
+  the library stays independent.
+- **`useNotify()`** — returns `{ notify, success, error, warning, info, dismiss }`,
+  identical on every platform. `success(msg, opts?)` ≡ `notify(msg, { tone:
+  'success', ...opts })`.
+- **`NotificationHost`** (platform-resolved) renders the queue:
+  - mobile (`.native.tsx`): Paper `Snackbar`, shown one at a time from the queue
+    with auto-hide + optional action;
+  - web (`.tsx`): MUI `Snackbar` + `Alert` (tone → `severity`), stacked, using
+    only the existing `@mui/material` peer (no Toolpad dependency).
+- **Wired into `SublimeProvider`**: the provider mounts the
+  `NotificationContext` provider and renders the platform `NotificationHost`, so
+  wrapping the app in `SublimeProvider` is all that's needed — `useNotify()`
+  then works anywhere beneath it.
+
+```tsx
+const { success, error } = useNotify();
+const onSave = async () => {
+  try { await Sale.make(form).save(); success('Sale saved'); }
+  catch (e) { error('Could not save the sale'); }
+};
+```
+
 ## 6. Component conventions
 
 Every one of the 20 components:
@@ -229,15 +266,20 @@ set (the app supplies icons via Paper's icon system / an MUI icon node).
   `.native.tsx`) plus a minimal `react-test-renderer` render that the component
   mounts under the Paper provider without throwing. Full RN visual testing is
   heavy and is a **documented limitation** to deepen later.
+- **Notifications:** the `NotificationContext` queue + `useNotify` are TDD'd
+  platform-agnostically (notify enqueues with the right tone, dismiss removes,
+  auto-hide duration honored); the web `NotificationHost` gets a render smoke
+  test, the native host a mount check.
 - A `Button` reference component is taken end-to-end on **both** platforms as
   the integration proof before the remaining components fan out.
 
 ## 9. Scope & future (YAGNI)
 
 **In #4 v1:** the token contract + `defaultTokens` (light+dark), `generateThemes`,
-`SublimeProvider` (+`useTokens`), and the 20 components above (18 cross-platform
-+ `BottomNav`/`Drawer` mobile-only with web stubs) with the glass default.
-Platform-resolved delivery that a consumer's Metro/Vite can bundle.
+`SublimeProvider` (+`useTokens`), the **unified notification system**
+(`useNotify` + platform `NotificationHost`), and the 20 components above (18
+cross-platform + `BottomNav`/`Drawer` mobile-only with web stubs) with the glass
+default. Platform-resolved delivery that a consumer's Metro/Vite can bundle.
 
 **Out of scope (future):**
 - **devkit-server theme customizer** — a visual editor that drives `tokens`
@@ -263,5 +305,8 @@ Platform-resolved delivery that a consumer's Metro/Vite can bundle.
 - Web components pass render smoke tests; every file typechecks; native
   components (incl. the two mobile-only) mount under the Paper provider; the web
   stubs render null without throwing.
+- `useNotify().success(msg)` (and error/warning/info) enqueues a notification
+  that the platform `NotificationHost` renders (Paper Snackbar on mobile, MUI
+  Snackbar/Alert on web); the queue + hook are unit-tested platform-agnostically.
 - `npm run typecheck`, `lint`, `test`, `build` green across the monorepo; the
   build preserves the `.native`/web split for consumer bundlers.
