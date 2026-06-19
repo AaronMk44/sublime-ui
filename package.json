@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": { "node": ">=18" },
-  "workspaces": ["framework", "library", "devkit"],
+  "workspaces": ["framework", "library", "devkit", "ui"],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",

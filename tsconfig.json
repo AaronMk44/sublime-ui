@@ -4,6 +4,7 @@
   "references": [
     { "path": "./framework" },
     { "path": "./library" },
-    { "path": "./devkit" }
+    { "path": "./devkit" },
+    { "path": "./ui" }
   ]
 }
