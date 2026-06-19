@@ -1,7 +1,7 @@
 export function renderMobileTaskList(): string {
   return `import { Screen, Stack } from '@sublime-ui/ui';
 import { useNav } from '@sublime-ui/ui/navigation';
-import { Text, Button } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import { Task } from '../../models/Task';
 
 export function TaskList() {

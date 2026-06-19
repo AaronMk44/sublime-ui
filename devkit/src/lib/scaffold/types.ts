@@ -15,12 +15,3 @@ export interface ScaffoldOptions {
   git?: boolean;
   yes?: boolean;
 }
-
-export interface ResolvedOptions {
-  dir: string;
-  name: string;
-  targets: Target[];
-  force: boolean;
-  install: boolean;
-  git: boolean;
-}

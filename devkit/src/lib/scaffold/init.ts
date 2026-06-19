@@ -82,7 +82,7 @@ export async function initApp(
 
   // Next steps.
   log.info('');
-  log.info(`Next:  cd ${name}`);
+  log.info(`Next:  cd ${basename(opts.dir)}`);
   if (!(opts.install ?? true)) log.info('       npm install && npm run build:nav');
   if (targets.includes('web')) log.info('       npm run dev:web');
   if (targets.includes('mobile')) log.info('       npm run dev:mobile');

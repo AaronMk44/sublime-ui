@@ -19,6 +19,10 @@ import type { PageOptions, PrintFormat, RouteNode } from './model.js';
  * `linkError` node (matching the runtime loader) so `validate` reports a clean
  * `bad-link` diagnostic rather than throwing.
  *
+ * Note: only same-file `const x = book(...)` links are resolved. A `link()` whose
+ * target is an IMPORTED `book()` from another file is not followed (we never load
+ * other modules) and resolves to a `linkError`.
+ *
  * @param absFile absolute path to a `storybook.{native,web}.ts` file.
  * @returns the analyzed `RouteNode` tree rooted at `key: 'root'`.
  */
@@ -26,19 +30,20 @@ export function analyzeStorybook(absFile: string): RouteNode {
   const source = readFileSync(absFile, 'utf8');
   const sf = ts.createSourceFile(absFile, source, ts.ScriptTarget.Latest, true);
 
-  const rootCall = findDefaultBookCall(sf);
+  // Index local `const <name> = book({...})` declarations so link() targets (and
+  // a `default`-exported book const) can be resolved by identifier without
+  // executing anything.
+  const localBooks = collectLocalBooks(sf);
+
+  const rootCall = findDefaultBookCall(sf, localBooks);
   if (rootCall === undefined) {
     throw new Error(`Storybook ${absFile} must default-export a book().`);
   }
 
-  // Index local `const <name> = book({...})` declarations so link() targets can
-  // be resolved by identifier without executing anything.
-  const localBooks = collectLocalBooks(sf);
-
   return bookToNode(rootCall, 'root', {}, sf, localBooks);
 }
 
-/** A node we are mid-resolving, to guard against cyclic local `link()` graphs. */
+/** Local `const <name> = book({...})` declarations, indexed by identifier name. */
 type LocalBooks = Map<string, ts.CallExpression>;
 
 /** Walk a `book({ format, pages })` call into a `RouteNode` book subtree. */
@@ -133,7 +138,10 @@ function optionsFromCall(call: ts.CallExpression, argIndex: number): PageOptions
  * Find the default-exported `book(...)` call expression, supporting both
  * `export default book({...})` and a `default` export of a `book(...)` const.
  */
-function findDefaultBookCall(sf: ts.SourceFile): ts.CallExpression | undefined {
+function findDefaultBookCall(
+  sf: ts.SourceFile,
+  localBooks: LocalBooks,
+): ts.CallExpression | undefined {
   let found: ts.CallExpression | undefined;
 
   for (const stmt of sf.statements) {
@@ -143,7 +151,7 @@ function findDefaultBookCall(sf: ts.SourceFile): ts.CallExpression | undefined {
         found = expr;
       } else if (ts.isIdentifier(expr)) {
         // `export default someConst;` where someConst = book({...})
-        const local = collectLocalBooks(sf).get(expr.text);
+        const local = localBooks.get(expr.text);
         if (local) found = local;
       }
     }

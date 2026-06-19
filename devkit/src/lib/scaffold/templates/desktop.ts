@@ -1,4 +1,4 @@
-import { PEER_VERSIONS } from '../versions.js';
+import { PEER_VERSIONS, SUBLIME_VERSIONS } from '../versions.js';
 
 export {
   renderForgeConfig, renderWebpackMain, renderWebpackRenderer, renderMainTs, renderPreloadTs,
@@ -46,7 +46,7 @@ export function renderDesktopPackageJson(name: string): string {
       typescript: PEER_VERSIONS['typescript']!,
     },
     dependencies: {
-      '@sublime-ui/desktop': '^0.1.0',
+      '@sublime-ui/desktop': SUBLIME_VERSIONS.desktop,
     },
   };
   return JSON.stringify(pkg, null, 2) + '\n';
