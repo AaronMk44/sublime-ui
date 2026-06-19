@@ -1,22 +1,76 @@
-/* Sublime UI docs theme — glass-leaning accent palette. */
+/**
+ * Sublime UI docs theme — "Strata" brand.
+ * Amber ribbon on cream/ink, Sora + Manrope + IBM Plex Mono.
+ * Token inventory: website/brand/brand-tokens.md
+ */
+
+/* ---- Typography ---- */
 :root {
-  --ifm-color-primary: #6366f1;
-  --ifm-color-primary-dark: #4f46e5;
-  --ifm-color-primary-darker: #4338ca;
-  --ifm-color-primary-darkest: #3730a3;
-  --ifm-color-primary-light: #818cf8;
-  --ifm-color-primary-lighter: #a5b4fc;
-  --ifm-color-primary-lightest: #c7d2fe;
-  --ifm-code-font-size: 95%;
+  --ifm-font-family-base: 'Manrope', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family: 'Sora', var(--ifm-font-family-base);
+  --ifm-font-family-monospace: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --ifm-heading-font-weight: 800;
+  --ifm-heading-letter-spacing: -0.02em;
+  --ifm-code-font-size: 92%;
 }
 
+/* ---- Light theme — amber primary on warm cream ---- */
+:root {
+  --ifm-color-primary: #c76a08;        /* amber-dark for AA contrast on white */
+  --ifm-color-primary-dark: #b35f07;
+  --ifm-color-primary-darker: #a85906;
+  --ifm-color-primary-darkest: #8a4905; /* ~#A0561A family */
+  --ifm-color-primary-light: #e07a0b;   /* brand amber */
+  --ifm-color-primary-lighter: #f2a33a; /* amber-light */
+  --ifm-color-primary-lightest: #f7bd6b;
+
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #fbf4e6;        /* cream-lighter */
+  --ifm-navbar-background-color: #fbf8f1;
+  --ifm-footer-background-color: #15130f;          /* ink-deepest */
+  --ifm-heading-color: #1e1b16;                    /* ink */
+  --ifm-font-color-base: #2c2922;
+  --ifm-code-background: #fbf4e6;
+  --ifm-color-content-secondary: #6b675f;          /* warm gray */
+  --docusaurus-highlighted-code-line-bg: rgba(224, 122, 11, 0.12);
+}
+
+/* ---- Dark theme — ink ground, amber-light accent ---- */
 [data-theme='dark'] {
-  --ifm-color-primary: #a5b4fc;
-  --ifm-color-primary-dark: #818cf8;
-  --ifm-color-primary-darker: #6366f1;
-  --ifm-color-primary-darkest: #4f46e5;
-  --ifm-color-primary-light: #c7d2fe;
-  --ifm-color-primary-lighter: #ddd6fe;
-  --ifm-color-primary-lightest: #ede9fe;
-  --ifm-background-color: #0b0d17;
+  --ifm-color-primary: #f2a33a;        /* amber-light reads on ink */
+  --ifm-color-primary-dark: #e07a0b;
+  --ifm-color-primary-darker: #d4730a;
+  --ifm-color-primary-darkest: #c76a08;
+  --ifm-color-primary-light: #f7bd6b;
+  --ifm-color-primary-lighter: #f9c98a;
+  --ifm-color-primary-lightest: #fbdcb0;
+
+  --ifm-background-color: #15130f;                 /* ink-deepest */
+  --ifm-background-surface-color: #1e1b16;          /* ink */
+  --ifm-navbar-background-color: #1a1712;
+  --ifm-footer-background-color: #100e0b;
+  --ifm-heading-color: #f7f3ea;                    /* warm off-white */
+  --ifm-font-color-base: #e7e3d8;
+  --ifm-code-background: #232019;                  /* ink-alt */
+  --ifm-color-content-secondary: #a99f8c;          /* warm muted */
+  --docusaurus-highlighted-code-line-bg: rgba(242, 163, 58, 0.16);
+}
+
+/* ---- Brand touches ---- */
+.navbar__title {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Eyebrow-style uppercase mono labels reuse the brand mono face by default. */
+.menu__link--active,
+.table-of-contents__link--active {
+  font-weight: 600;
+}
+
+/* Inline code: warm tint + amber ink, matching the logo exploration's tags. */
+code {
+  border: 1px solid rgba(224, 122, 11, 0.18);
+  border-radius: 6px;
 }

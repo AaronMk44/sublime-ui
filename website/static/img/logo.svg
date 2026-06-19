@@ -1,0 +1,4 @@
+<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sublime UI">
+  <rect x="2" y="2" width="96" height="96" rx="24" fill="#F4EBD8"/>
+  <polyline points="67,24 33,40 67,60 33,76" fill="none" stroke="#E07A0B" stroke-width="16.5" stroke-linejoin="miter" stroke-miterlimit="3"/>
+</svg>
