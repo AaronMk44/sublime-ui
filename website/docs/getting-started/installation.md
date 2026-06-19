@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 title: Installation
 ---
 
@@ -8,6 +8,19 @@ title: Installation
 Sublime UI is a TypeScript-only framework. You bring Node and the `sublime` CLI;
 Sublime brings the model layer, the design system, navigation, and the native
 bridge — shared across mobile, web, and desktop.
+
+## Scaffold a new app (recommended)
+
+The fastest start is the generator — it writes a complete app and installs
+everything:
+
+```bash
+npm create @sublime-ui/app@latest my-app
+```
+
+See **[Scaffold a New App](./scaffold-a-new-app)** for the full step-by-step
+walkthrough. The rest of this page covers installing Sublime into an existing
+project by hand.
 
 ## Prerequisites
 
