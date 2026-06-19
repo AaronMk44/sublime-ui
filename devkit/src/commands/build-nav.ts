@@ -1,17 +1,26 @@
 import { join } from 'node:path';
+import { readFileSync, watch as fsWatch, type FSWatcher } from 'node:fs';
 import { loadConfig } from '../lib/generators/config.js';
 import { loadStorybook } from '../lib/navigation/load-storybook.js';
 import { validate, type Diagnostic } from '../lib/navigation/validate.js';
 import { flatten } from '../lib/navigation/flatten.js';
+import { extractParams } from '../lib/navigation/extract-params.js';
+import { mergeRouteParams } from '../lib/navigation/merge-route-params.js';
 import { renderNative } from '../lib/navigation/render-native.js';
 import { renderWeb } from '../lib/navigation/render-web.js';
-import { renderRoutesDts, type RouteParam } from '../lib/navigation/render-routes-dts.js';
+import { renderRoutesDts } from '../lib/navigation/render-routes-dts.js';
 import { safeWrite } from '../lib/generators/write.js';
 import { log } from '../util/log.js';
 
 export interface BuildNavOptions {
   cwd: string;
+  /** Re-run the build whenever a storybook source changes. */
   watch?: boolean;
+  /**
+   * Overwrite pre-existing non-generated files. The four AUTO-GENERATED outputs
+   * are always force-overwritten (they are owned by the generator); `force` is
+   * carried for surface parity with the other generators and future outputs.
+   */
   force?: boolean;
 }
 
@@ -48,6 +57,18 @@ export async function buildNav(opts: BuildNavOptions): Promise<number> {
   const nativeFile = join(navDir, 'storybook.native.ts');
   const webFile = join(navDir, 'storybook.web.ts');
 
+  const code = await buildOnce(navDir, nativeFile, webFile);
+
+  if (opts.watch) {
+    watchAndRebuild(navDir, nativeFile, webFile);
+    // In watch mode the process stays alive; report the first build's result.
+  }
+
+  return code;
+}
+
+/** Run a single load → validate → render → write pass. */
+async function buildOnce(navDir: string, nativeFile: string, webFile: string): Promise<number> {
   let nativeRoot;
   let webRoot;
   try {
@@ -68,16 +89,33 @@ export async function buildNav(opts: BuildNavOptions): Promise<number> {
     return 1;
   }
 
+  // Param types are erased by the runtime import; recover the explicit
+  // `page<...>()` type arguments by scanning each platform's source.
+  const nativeParams = extractParams(readFileSync(nativeFile, 'utf8'));
+  const webParams = extractParams(readFileSync(webFile, 'utf8'));
+
+  // Each platform may have its own pages (spec §2.4/§10) — union both flattened
+  // trees into one AppRoutes route map; conflicting param types are an error.
+  const { routes, conflicts } = mergeRouteParams({
+    nativeKeys: flatten(nativeRoot).routes.map((r) => r.key),
+    webKeys: flatten(webRoot).routes.map((r) => r.key),
+    nativeParams,
+    webParams,
+  });
+  if (conflicts.length > 0) {
+    for (const key of conflicts) {
+      log.error(
+        `route-param-conflict ${key}: native and web declare different param types for "${key}". ` +
+          `Fix: make both page<...>() type arguments agree.`,
+      );
+    }
+    log.error(`build:nav failed with ${conflicts.length} error(s); wrote nothing.`);
+    return 1;
+  }
+
   const nativeSrc = renderNative(nativeRoot, { screensImport: SCREENS_IMPORT });
   const webSrc = renderWeb(webRoot, { screensImport: SCREENS_IMPORT });
-
-  // Route param types come from the native tree (the canonical route set);
-  // params are erased at runtime, so every route defaults to `void`.
-  const routeParams: RouteParam[] = flatten(nativeRoot).routes.map((r) => ({
-    key: r.key,
-    params: 'void',
-  }));
-  const dtsSrc = renderRoutesDts(routeParams);
+  const dtsSrc = renderRoutesDts(routes);
 
   // Generated files are owned by the generator: force-overwrite unconditionally.
   safeWrite(join(navDir, 'navigation.native.tsx'), nativeSrc, true);
@@ -87,4 +125,20 @@ export async function buildNav(opts: BuildNavOptions): Promise<number> {
 
   log.success(`build:nav wrote 4 files to ${navDir}`);
   return 0;
+}
+
+/**
+ * Watch both storybook sources and re-run the build (debounced) on change.
+ * Long-lived: the returned watchers keep the process alive until interrupted.
+ */
+function watchAndRebuild(navDir: string, nativeFile: string, webFile: string): FSWatcher[] {
+  log.info(`build:nav watching ${navDir} — Ctrl-C to stop.`);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const trigger = (): void => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      void buildOnce(navDir, nativeFile, webFile);
+    }, 50);
+  };
+  return [nativeFile, webFile].map((file) => fsWatch(file, trigger));
 }
