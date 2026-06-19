@@ -96,6 +96,30 @@ describe('startDesktop', () => {
     expect(calls.loadFile).toEqual([]);
   });
 
+  it('routes a rejected whenReady to onError instead of an unhandled rejection', async () => {
+    const boom = new Error('whenReady failed');
+    const app = { whenReady: () => Promise.reject(boom) };
+    const ipcMain = fakeIpcMain();
+    const { FakeWindow } = fakeBrowserWindow();
+    const seen: unknown[] = [];
+
+    startDesktop({
+      app,
+      ipcMain,
+      entry: '/dist/index.html',
+      preload: '/p.js',
+      isDev: false,
+      BrowserWindowCtor: FakeWindow as never,
+      onError: (e) => seen.push(e),
+    });
+
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(seen).toEqual([boom]);
+  });
+
   it('loads the entry via loadFile in production mode', async () => {
     const app = fakeApp();
     const ipcMain = fakeIpcMain();

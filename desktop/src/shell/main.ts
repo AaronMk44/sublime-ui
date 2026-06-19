@@ -33,6 +33,12 @@ export interface StartDesktopOptions {
   isDev: boolean;
   /** Injectable `BrowserWindow` constructor; defaults to Electron's. */
   BrowserWindowCtor?: BrowserWindowCtor;
+  /**
+   * Called if `whenReady` rejects or window creation throws. Defaults to
+   * logging the error, so a failed bootstrap never becomes an unhandled
+   * promise rejection.
+   */
+  onError?: (error: unknown) => void;
 }
 
 /**
@@ -43,14 +49,22 @@ export interface StartDesktopOptions {
  *   injectable for tests.
  */
 export function startDesktop(opts: StartDesktopOptions): void {
-  void opts.app.whenReady().then(() => {
-    installNativeRouter(opts.ipcMain);
-    createWindow({
-      entry: opts.entry,
-      preload: opts.preload,
-      ...(opts.BrowserWindowCtor !== undefined
-        ? { BrowserWindowCtor: opts.BrowserWindowCtor }
-        : {}),
+  const onError =
+    opts.onError ??
+    ((error: unknown): void => {
+      console.error('[sublime/desktop] startDesktop failed:', error);
     });
-  });
+  void opts.app
+    .whenReady()
+    .then(() => {
+      installNativeRouter(opts.ipcMain);
+      createWindow({
+        entry: opts.entry,
+        preload: opts.preload,
+        ...(opts.BrowserWindowCtor !== undefined
+          ? { BrowserWindowCtor: opts.BrowserWindowCtor }
+          : {}),
+      });
+    })
+    .catch(onError);
 }
