@@ -7,7 +7,9 @@ import {
 describe('web templates', () => {
   it('TaskList reads the model reactively and links to detail', () => {
     const src = renderWebTaskList();
-    expect(src).toContain("from '@sublime-ui/ui'");
+    // Screen/Stack from the package root; useNav from the /navigation subpath.
+    expect(src).toContain("import { Screen, Stack } from '@sublime-ui/ui';");
+    expect(src).toContain("import { useNav } from '@sublime-ui/ui/navigation';");
     expect(src).toContain('Task.rxAll()');
     expect(src).toContain('useNav()');
   });

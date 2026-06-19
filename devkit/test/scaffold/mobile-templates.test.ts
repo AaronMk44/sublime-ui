@@ -6,8 +6,12 @@ import {
 
 describe('mobile templates', () => {
   it('mobile screens use Paper Text and the model', () => {
-    expect(renderMobileTaskList()).toContain("from 'react-native-paper'");
-    expect(renderMobileTaskList()).toContain('Task.rxAll()');
+    const list = renderMobileTaskList();
+    // Screen/Stack from the package root; useNav from the /navigation subpath.
+    expect(list).toContain("import { Screen, Stack } from '@sublime-ui/ui';");
+    expect(list).toContain("import { useNav } from '@sublime-ui/ui/navigation';");
+    expect(list).toContain("from 'react-native-paper'");
+    expect(list).toContain('Task.rxAll()');
     const detail = renderMobileTaskDetail();
     expect(detail).toContain("import type { AppRoutes } from '../../navigation'");
     expect(detail).toContain('useNav<AppRoutes>()');
