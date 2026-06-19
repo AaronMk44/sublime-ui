@@ -21,15 +21,8 @@ const config: Config = {
 
   markdown: { hooks: { onBrokenMarkdownLinks: 'warn' } },
 
-  // Brand fonts (Strata): Sora · Manrope · IBM Plex Mono
-  stylesheets: [
-    { href: 'https://fonts.googleapis.com', rel: 'preconnect' },
-    { href: 'https://fonts.gstatic.com', rel: 'preconnect', crossorigin: 'anonymous' },
-    {
-      href: 'https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap',
-      rel: 'stylesheet',
-    },
-  ],
+  // Brand fonts (Strata): Sora · Manrope · IBM Plex Mono — self-hosted, offline-safe.
+  clientModules: ['./src/fonts.ts'],
 
   presets: [
     [

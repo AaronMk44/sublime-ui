@@ -256,7 +256,17 @@ const MARKUP = String.raw`
 
 export default function Home(): React.ReactElement {
   const docs = useBaseUrl('/docs/');
-  const html = MARKUP.split('%DOCS%').join(docs).split('%GH%').join('https://github.com/AaronMk44/sublime-ui');
+  const html = MARKUP.split('%DOCS%')
+    .join(docs)
+    .split('%GH%')
+    .join('https://github.com/AaronMk44/sublime-ui')
+    // Generic fallbacks so the page never drops to serif if a webfont is slow/missing.
+    .split("font-family:'Sora'")
+    .join("font-family:'Sora', system-ui, sans-serif")
+    .split("font-family:'Manrope'")
+    .join("font-family:'Manrope', system-ui, sans-serif")
+    .split("font-family:'IBM Plex Mono'")
+    .join("font-family:'IBM Plex Mono', ui-monospace, monospace");
   return (
     <>
       <Head>
