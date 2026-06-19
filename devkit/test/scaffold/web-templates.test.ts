@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  renderWebTaskList, renderWebTaskDetail, renderStorybookWeb,
+  renderWebTaskList, renderWebTaskDetail, renderStorybookWeb, renderWebScreensBarrel,
   renderWebIndexHtml, renderWebMain, renderViteConfig,
 } from '../../src/lib/scaffold/templates/web.js';
 
@@ -19,6 +19,11 @@ describe('web templates', () => {
     expect(src).toContain("from '@sublime-ui/ui/navigation'");
     expect(src).toContain("format: 'sidebar'");
     expect(src).toContain('page<{ id: number }>');
+  });
+  it('screens barrel re-exports TaskList and TaskDetail from web screens', () => {
+    const src = renderWebScreensBarrel();
+    expect(src).toContain("export { TaskList } from '../screens/web/TaskList'");
+    expect(src).toContain("export { TaskDetail } from '../screens/web/TaskDetail'");
   });
   it('web entry mounts the provider + generated Navigation', () => {
     expect(renderWebMain()).toContain('SublimeProvider');

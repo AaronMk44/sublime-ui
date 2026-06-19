@@ -6,11 +6,11 @@ import {
   renderTaskModel, renderModelsBarrel, renderThemeTokensJson, renderThemeTokensTs,
 } from './templates/shared.js';
 import {
-  renderWebTaskList, renderWebTaskDetail, renderStorybookWeb,
+  renderWebTaskList, renderWebTaskDetail, renderStorybookWeb, renderWebScreensBarrel,
   renderWebIndexHtml, renderWebMain, renderViteConfig,
 } from './templates/web.js';
 import {
-  renderMobileTaskList, renderMobileTaskDetail, renderStorybookNative,
+  renderMobileTaskList, renderMobileTaskDetail, renderStorybookNative, renderMobileScreensBarrel,
   renderMobileEntry, renderMobileApp,
 } from './templates/mobile.js';
 import {
@@ -39,6 +39,7 @@ export function buildScaffoldPlan(opts: { name: string; targets: Target[] }): Sc
     files.push(
       { path: 'src/screens/web/TaskList.tsx', contents: renderWebTaskList() },
       { path: 'src/screens/web/TaskDetail.tsx', contents: renderWebTaskDetail() },
+      { path: 'src/navigation/screens.ts', contents: renderWebScreensBarrel() },
       { path: 'src/navigation/storybook.web.ts', contents: renderStorybookWeb() },
       { path: 'web/index.html', contents: renderWebIndexHtml(name) },
       { path: 'web/main.tsx', contents: renderWebMain() },
@@ -50,6 +51,7 @@ export function buildScaffoldPlan(opts: { name: string; targets: Target[] }): Sc
     files.push(
       { path: 'src/screens/mobile/TaskList.native.tsx', contents: renderMobileTaskList() },
       { path: 'src/screens/mobile/TaskDetail.native.tsx', contents: renderMobileTaskDetail() },
+      { path: 'src/navigation/screens.native.ts', contents: renderMobileScreensBarrel() },
       { path: 'src/navigation/storybook.native.ts', contents: renderStorybookNative() },
       { path: 'mobile/index.js', contents: renderMobileEntry() },
       { path: 'mobile/App.native.tsx', contents: renderMobileApp() },

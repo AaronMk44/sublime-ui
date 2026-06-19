@@ -18,6 +18,7 @@ describe('buildScaffoldPlan', () => {
     const p = paths(['web']);
     expect(p).toContain('src/screens/web/TaskList.tsx');
     expect(p).toContain('src/screens/web/TaskDetail.tsx');
+    expect(p).toContain('src/navigation/screens.ts');
     expect(p).toContain('src/navigation/storybook.web.ts');
     expect(p).toContain('web/main.tsx');
     expect(p).toContain('vite.config.ts');
@@ -26,6 +27,7 @@ describe('buildScaffoldPlan', () => {
   it('mobile target adds native screens, storybook.native, app.json, and the RN entry', () => {
     const p = paths(['mobile']);
     expect(p).toContain('src/screens/mobile/TaskList.native.tsx');
+    expect(p).toContain('src/navigation/screens.native.ts');
     expect(p).toContain('src/navigation/storybook.native.ts');
     expect(p).toContain('mobile/App.native.tsx');
     expect(p).toContain('app.json');

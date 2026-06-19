@@ -57,6 +57,12 @@ export default book({
 `;
 }
 
+export function renderWebScreensBarrel(): string {
+  return `export { TaskList } from '../screens/web/TaskList';
+export { TaskDetail } from '../screens/web/TaskDetail';
+`;
+}
+
 export function renderWebIndexHtml(name: string): string {
   return `<!doctype html>
 <html lang="en">

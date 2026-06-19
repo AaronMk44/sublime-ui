@@ -59,6 +59,12 @@ export default book({
 `;
 }
 
+export function renderMobileScreensBarrel(): string {
+  return `export { TaskList } from '../screens/mobile/TaskList.native';
+export { TaskDetail } from '../screens/mobile/TaskDetail.native';
+`;
+}
+
 export function renderMobileEntry(): string {
   return `import { AppRegistry } from 'react-native';
 import { App } from './App.native';
