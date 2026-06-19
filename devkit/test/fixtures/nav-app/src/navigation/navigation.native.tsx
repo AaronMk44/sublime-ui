@@ -9,10 +9,14 @@ import { NavProvider } from '@sublime-ui/ui/navigation';
 import { useNativeNav } from '@sublime-ui/ui/navigation/bridge.native';
 import { Home, ProductDetail, Profile } from './screens';
 
+function NavIcon(_props: { name: string }): ReactNode {
+  return null;
+}
+
 function SettingsNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="profile" component={Profile} />
+      <Stack.Screen name="profile" component={Profile} options={{ title: "Profile" }} />
     </Stack.Navigator>
   );
 }
@@ -20,9 +24,9 @@ function SettingsNavigator() {
 function RootNavigator() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="home" component={Home} />
-      <Tab.Screen name="product" component={ProductDetail} />
-      <Tab.Screen name="settings" component={SettingsNavigator} />
+      <Tab.Screen name="home" component={Home} options={{ title: "Home", tabBarIcon: () => <NavIcon name={"home"} /> }} />
+      <Tab.Screen name="product" component={ProductDetail} options={{ title: "Product" }} />
+      <Tab.Screen name="settings" component={SettingsNavigator} options={{ title: "Settings", tabBarIcon: () => <NavIcon name={"cog"} /> }} />
     </Tab.Navigator>
   );
 }

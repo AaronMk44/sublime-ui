@@ -11,6 +11,12 @@ const paths: Record<string, string> = {
   "profile": "/settings/profile",
 };
 
+export const titles: Record<string, { title?: string; icon?: string }> = {
+  "home": { title: "Home" },
+  "product": { title: "Product" },
+  "profile": { title: "Profile" },
+};
+
 function pathOf(name: string, params?: unknown): string {
   let path = paths[name] ?? '/';
   if (params && typeof params === 'object') {
@@ -22,8 +28,16 @@ function pathOf(name: string, params?: unknown): string {
 }
 
 function nameOf(path: string): string {
+  const norm = (p: string) => (p.length > 1 && p.endsWith('/') ? p.slice(0, -1) : p);
+  const target = norm(path);
   for (const [name, p] of Object.entries(paths)) {
-    if (p === path) return name;
+    const pattern = norm(p);
+    if (pattern === target) return name;
+    // Match parameterized routes (':id' segments) positionally.
+    if (pattern.includes(':')) {
+      const re = new RegExp('^' + pattern.replace(/:[^/]+/g, '[^/]+') + '$');
+      if (re.test(target)) return name;
+    }
   }
   return path;
 }

@@ -49,4 +49,28 @@ describe('renderNative', () => {
     expect(out).toContain("import type { ReactNode } from 'react';");
     expect(out).not.toContain('React.ReactNode');
   });
+
+  const optioned = {
+    key: 'root', kind: 'book', format: 'bottomNav', options: {},
+    children: [
+      { key: 'home', kind: 'page', component: 'Home', options: { title: 'Home', icon: 'house' } },
+      { key: 'product', kind: 'page', component: 'Product', options: { title: 'Product', initial: true } },
+    ],
+  } as const;
+
+  it('emits the page title as the screen options.title label', () => {
+    const out = renderNative(optioned as any, { screensImport: './screens' });
+    expect(out).toContain('options={{ title: "Home"');
+  });
+
+  it('emits the page icon for a tab navigator screen', () => {
+    const out = renderNative(optioned as any, { screensImport: './screens' });
+    expect(out).toContain('tabBarIcon');
+    expect(out).toContain('"house"');
+  });
+
+  it('drives initialRouteName from the initial page option', () => {
+    const out = renderNative(optioned as any, { screensImport: './screens' });
+    expect(out).toContain('initialRouteName="product"');
+  });
 });

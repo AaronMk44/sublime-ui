@@ -38,4 +38,24 @@ describe('renderWeb', () => {
     expect(out).toContain('NavProvider');
     expect(out).toContain('useWebNav(pathOf, nameOf)');
   });
+
+  const optioned = {
+    key: 'root', kind: 'book', format: 'sidebar', options: {},
+    children: [
+      { key: 'home', kind: 'page', component: 'Home', options: { title: 'Home', icon: 'house' } },
+      { key: 'product', kind: 'page', component: 'Product', options: { title: 'Product', initial: true } },
+    ],
+  } as const;
+
+  it('emits an index route for the initial page', () => {
+    const out = renderWeb(optioned as any, { screensImport: './screens' });
+    expect(out).toContain('<Route index element={<Product />} />');
+  });
+
+  it('emits a titles map carrying the page title and icon', () => {
+    const out = renderWeb(optioned as any, { screensImport: './screens' });
+    expect(out).toContain('"home"');
+    expect(out).toContain('title: "Home"');
+    expect(out).toContain('icon: "house"');
+  });
 });
