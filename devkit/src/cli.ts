@@ -107,9 +107,14 @@ program
   .option('--force', 'overwrite generated files')
   .option('--project <path>', 'project directory', process.cwd())
   .action(async (opts: { watch?: boolean; force?: boolean; project: string }) => {
-    process.exit(
-      await buildNav({ cwd: opts.project, watch: opts.watch ?? false, force: opts.force ?? false }),
-    );
+    const code = await buildNav({
+      cwd: opts.project,
+      watch: opts.watch ?? false,
+      force: opts.force ?? false,
+    });
+    // In watch mode, leave the process running so the fs.watch handlers stay
+    // alive; exiting here would tear them down before the first rebuild fires.
+    if (!opts.watch) process.exit(code);
   });
 
 program.parseAsync(process.argv).catch((err: unknown) => {
