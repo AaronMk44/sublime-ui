@@ -32,5 +32,5 @@ web). Calls travel over one generic IPC channel to the main process, which
 dispatches to a registered service. Adding a capability never touches the preload
 or the bridge — you just register one more service.
 
-See [project structure](./project-structure.md) for how the `desktop/` shell sits
+See [project structure](../framework/project-structure.md) for how the `desktop/` shell sits
 alongside your shared `src/`.

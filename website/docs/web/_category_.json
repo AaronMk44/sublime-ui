@@ -1,0 +1,5 @@
+{
+  "label": "Web",
+  "position": 7,
+  "link": { "type": "generated-index", "description": "The web target: a Vite + MUI single-page app with compiled react-router navigation." }
+}

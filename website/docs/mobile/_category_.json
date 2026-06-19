@@ -1,0 +1,5 @@
+{
+  "label": "Mobile",
+  "position": 8,
+  "link": { "type": "generated-index", "description": "The mobile target: React Native + Paper screens with compiled native navigation and offline Android builds." }
+}
