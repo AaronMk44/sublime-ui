@@ -4,10 +4,13 @@ import { registerReducer } from './store/store.js';
 import { modelRegistry } from './discovery/modelRegistry.js';
 
 export function registerModel(
-  ModelClass: { name: string; resource?: string },
+  // Accepts a Model subclass. `resource` is read internally; it is intentionally
+  // not part of this type so subclasses can keep it `protected static` (as the
+  // Model base and the docs recommend) without a public/protected mismatch.
+  ModelClass: { name: string },
   opts: { name?: string; idKey?: string } = {},
 ): void {
-  const resource = ModelClass.resource;
+  const resource = (ModelClass as { resource?: string }).resource;
   if (!resource) {
     throw new Error(
       `Model "${ModelClass.name}" is missing a static "resource" (e.g. protected static resource = '/users').`,
