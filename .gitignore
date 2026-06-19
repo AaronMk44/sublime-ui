@@ -40,3 +40,6 @@ Thumbs.db
 
 # git worktrees for parallel tracks
 .worktrees/
+
+# Superpowers visual-companion scratch (brainstorm mockups)
+.superpowers/
