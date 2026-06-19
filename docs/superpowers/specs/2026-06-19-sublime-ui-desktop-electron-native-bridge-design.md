@@ -57,7 +57,7 @@ registerNative([fs, dialog, shell, clipboard, notifications, printer]);
 **Consume (renderer / any screen):**
 
 ```ts
-import { useNative } from '@sublime-ui/desktop';
+import { useNative } from '@sublime-ui/desktop/client'; // renderer-safe entry
 import type { Printer } from '../../native/printer.service';
 
 const printer = useNative<Printer>('printer');   // null on plain web
@@ -67,6 +67,16 @@ await printer?.print(receipt);
 `useNative<T>(name)` returns a **typed proxy** (or `null` when not running in the
 desktop shell), so the same screen runs on web/mobile without `if (isDesktop)`
 guards scattered through it.
+
+**Import boundary.** Renderer code imports from `@sublime-ui/desktop/client`
+(`useNative`, `defineNative`, contract types, `NativeError`, `createProxy`) — a
+barrel that transitively pulls in **no** `node:*`/`electron`, so the web bundle
+can never include native code. Main-process code imports from the root
+`@sublime-ui/desktop` barrel, which additionally exposes the Electron shell
+(`startDesktop`/`createWindow`), the router/preload, `registerNative`, and the
+built-in `fs`/`dialog`/`shell`/`clipboard`/`notifications` services. The package
+is also marked `"sideEffects": false` so a `useNative`-only import from the root
+barrel remains tree-shakeable.
 
 ### 2.2 Why the hook (not direct `Service.method()`)
 
@@ -186,7 +196,8 @@ desktop/src/
     create-window.ts      # secure BrowserWindow (contextIsolation on, nodeIntegration off)
     main.ts               # Electron app entry (dev URL vs file://)
   services/               # built-ins: fs.ts, dialog.ts, shell.ts, clipboard.ts, notifications.ts
-  index.ts                # public exports (defineNative, useNative, registerNative, types, built-ins)
+  client.ts               # renderer-safe barrel (@sublime-ui/desktop/client): useNative, defineNative, types, errors, proxy — NO node/electron
+  index.ts                # root barrel (main): adds shell + services + registerNative; "sideEffects": false
 
 devkit/src/commands/
   desktop-dev.ts          # wraps electron-forge start (+ cli.ts wiring)

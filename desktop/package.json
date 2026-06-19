@@ -1,0 +1,27 @@
+{
+  "name": "@sublime-ui/desktop",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./client": { "types": "./dist/client.d.ts", "import": "./dist/client.js" }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src"
+  },
+  "peerDependencies": { "electron": ">=30", "react": ">=18" },
+  "peerDependenciesMeta": { "electron": { "optional": true }, "react": { "optional": true } },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^18.3.12",
+    "electron": "^33.0.0",
+    "react": "^18.3.1",
+    "@testing-library/react": "^16.0.1",
+    "jsdom": "^25.0.1"
+  }
+}

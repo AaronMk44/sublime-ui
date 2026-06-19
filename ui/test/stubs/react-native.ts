@@ -8,7 +8,6 @@
  * needs to be load-bearing enough for Paper's modules to evaluate; the MD3
  * theme constants are static colour data and need no RN runtime behaviour.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const noop = (): void => {};
 const passthrough = (x: any): any => x;
