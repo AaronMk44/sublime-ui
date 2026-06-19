@@ -18,6 +18,7 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
+    "typecheck:fixture": "tsc -p test/fixtures/nav-app/tsconfig.json",
     "test": "vitest run",
     "lint": "eslint src"
   },

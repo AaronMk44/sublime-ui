@@ -4,7 +4,9 @@
   "type": "module",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./navigation": { "types": "./dist/navigation/index.d.ts", "import": "./dist/navigation/index.js" }
+    "./navigation": { "types": "./dist/navigation/index.d.ts", "import": "./dist/navigation/index.js" },
+    "./navigation/bridge.native": { "types": "./dist/navigation/bridge.native.d.ts", "import": "./dist/navigation/bridge.native.js" },
+    "./navigation/bridge.web": { "types": "./dist/navigation/bridge.web.d.ts", "import": "./dist/navigation/bridge.web.js" }
   },
   "react-native": "./src/index.ts",
   "files": ["dist", "src"],

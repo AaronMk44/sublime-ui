@@ -1,0 +1,5 @@
+# `build:nav` emits LF-terminated source. The fixture-build drift test compares
+# the committed generated files byte-for-byte against a fresh `safeWrite`, so
+# pin every file here to LF — otherwise core.autocrlf would rewrite them to CRLF
+# on checkout and the comparison (and the generated `tsx` typecheck) would break.
+* text eol=lf

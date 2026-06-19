@@ -1,0 +1,17 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["react"],
+    "skipLibCheck": true,
+    "noUnusedLocals": false
+  },
+  "include": [
+    "src/navigation/navigation.native.tsx",
+    "src/navigation/navigation.web.tsx",
+    "src/navigation/routes.d.ts",
+    "src/navigation/screens/index.tsx"
+  ]
+}
