@@ -1,7 +1,9 @@
 # @sublime-ui/devkit
 
-The Sublime UI developer CLI. Today it builds **standalone Android APKs fully
-offline** — no EAS / cloud build. Bin names: `sublime` (alias `sui`).
+The [Sublime UI](https://sublime-ui.github.io/sublime-ui/) developer CLI —
+code generators, the navigation compiler, desktop tooling, and **standalone
+Android APK builds fully offline** (no EAS / cloud build). Bin names: `sublime`
+(alias `sui`).
 
 ## What "offline" means
 
@@ -33,6 +35,19 @@ from `sublime.config.json` (defaults: `src/models`, `src/components`, `src/theme
 
 Generators never overwrite without `--force`; barrel updates are idempotent.
 
+## Navigation compiler
+
+| Command | What it does |
+|---|---|
+| `sublime build:nav [--watch] [--force] [--project <path>]` | Compiles per-platform storybooks (`storybook.web.ts` / `storybook.native.ts`) into `navigation.web.tsx` (react-router), `navigation.native.tsx` (React Navigation), a typed route map (`routes.d.ts`), and an index barrel. `--watch` rebuilds on change. |
+
+## Desktop (Electron Forge)
+
+| Command | What it does |
+|---|---|
+| `sublime desktop:dev [--project <path>]` | Runs the Electron desktop shell in development (`electron-forge start`). |
+| `sublime desktop:build [--project <path>]` | Builds distributable desktop artifacts (`electron-forge make`). |
+
 ## Robustness (lessons baked in)
 
 - **Self-healing SDK installs.** On `Failed to install … ndk;X / cmake;Y`, the id
@@ -55,5 +70,15 @@ Generators never overwrite without `--force`; barrel updates are idempotent.
 
 ## Scope
 
-Android only (iOS needs macOS). macOS/Linux: `doctor`/`build`/`run` work;
-`setup` prints guided steps instead of auto-installing.
+Offline Android builds are Android only (iOS needs macOS). macOS/Linux:
+`doctor`/`build`/`run` work; `setup` prints guided steps instead of
+auto-installing. Generators, `build:nav`, and the desktop commands are
+cross-platform.
+
+## Documentation
+
+Full CLI reference: **https://sublime-ui.github.io/sublime-ui/docs/devkit**
+
+## License
+
+MIT

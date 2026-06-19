@@ -2,9 +2,26 @@
   "name": "sublime-ui",
   "version": "0.0.0",
   "private": true,
+  "description": "Sublime UI monorepo — write the non-UI parts once, run on mobile, web, and desktop in TypeScript.",
+  "homepage": "https://sublime-ui.github.io/sublime-ui/",
+  "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sublime-ui/sublime-ui.git"
+  },
+  "license": "MIT",
+  "author": "Aaron Mkandawire",
   "type": "module",
-  "engines": { "node": ">=18" },
-  "workspaces": ["framework", "library", "devkit", "ui", "desktop"],
+  "engines": {
+    "node": ">=18"
+  },
+  "workspaces": [
+    "framework",
+    "library",
+    "devkit",
+    "ui",
+    "desktop"
+  ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -13,6 +30,7 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",

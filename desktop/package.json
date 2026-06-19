@@ -1,6 +1,14 @@
 {
   "name": "@sublime-ui/desktop",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Electron desktop packaging and a secure native bridge (defineNative/useNative over one IPC channel) for Sublime UI apps.",
+  "keywords": ["sublime-ui", "electron", "desktop", "ipc", "native-bridge", "electron-forge", "cross-platform", "typescript"],
+  "homepage": "https://sublime-ui.github.io/sublime-ui/",
+  "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
+  "repository": { "type": "git", "url": "git+https://github.com/sublime-ui/sublime-ui.git", "directory": "desktop" },
+  "license": "MIT",
+  "author": "Aaron Mkandawire",
+  "publishConfig": { "access": "public" },
   "type": "module",
   "sideEffects": false,
   "exports": {

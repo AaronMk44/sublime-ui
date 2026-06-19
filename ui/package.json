@@ -1,6 +1,14 @@
 {
   "name": "@sublime-ui/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Cross-platform navigation (storybook → React Navigation / react-router) and layout primitives for Sublime UI.",
+  "keywords": ["sublime-ui", "navigation", "react-navigation", "react-router", "layout", "storybook", "cross-platform", "typescript"],
+  "homepage": "https://sublime-ui.github.io/sublime-ui/",
+  "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
+  "repository": { "type": "git", "url": "git+https://github.com/sublime-ui/sublime-ui.git", "directory": "ui" },
+  "license": "MIT",
+  "author": "Aaron Mkandawire",
+  "publishConfig": { "access": "public" },
   "type": "module",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
