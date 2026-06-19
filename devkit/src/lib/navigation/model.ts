@@ -20,4 +20,10 @@ export interface RouteNode {
   component?: string;
   options: PageOptions;
   children?: RouteNode[];
+  /**
+   * Set by `load-storybook` when a `link()` does not reference a valid `book()`.
+   * Carried as data (rather than thrown) so `validate` can report it as a clean
+   * `bad-link` diagnostic alongside the other rules.
+   */
+  linkError?: string;
 }

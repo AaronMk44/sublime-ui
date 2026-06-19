@@ -16,6 +16,7 @@ const WEB_FORMATS = new Set<PrintFormat>(['sidebar', 'stack', 'tabs']);
  * - `duplicate-key`: the same page key appears more than once across the tree.
  * - `dangling`: a page has no component / a link or book has no children.
  * - `multiple-initial`: a book has more than one child with `initial: true`.
+ * - `bad-link`: a `link()` does not reference a `book()` (flagged by load-storybook).
  */
 export function validate(root: RouteNode, platform: 'mobile' | 'web'): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
@@ -26,8 +27,13 @@ export function validate(root: RouteNode, platform: 'mobile' | 'web'): Diagnosti
     diagnostics.push({ level: 'error', rule, message });
   };
 
-  const walk = (node: RouteNode): void => {
-    keyCounts.set(node.key, (keyCounts.get(node.key) ?? 0) + 1);
+  const walk = (node: RouteNode, isRoot: boolean): void => {
+    // The synthetic root book key ('root') is not part of the authored
+    // navigation namespace, so it must not collide with a user page named
+    // 'root' nor flag itself as a duplicate.
+    if (!isRoot) {
+      keyCounts.set(node.key, (keyCounts.get(node.key) ?? 0) + 1);
+    }
 
     if (node.kind === 'page') {
       if (!node.component) {
@@ -38,6 +44,15 @@ export function validate(root: RouteNode, platform: 'mobile' | 'web'): Diagnosti
 
     // book
     const children = node.children ?? [];
+
+    if (node.linkError !== undefined) {
+      error(
+        'bad-link',
+        `Book "${node.key}": ${node.linkError} Fix: pass a value returned by book() to link().`,
+      );
+      // A bad link has no usable subtree; skip its other book rules.
+      return;
+    }
 
     if (children.length === 0) {
       error('dangling', `Book "${node.key}" has no children.`);
@@ -69,11 +84,11 @@ export function validate(root: RouteNode, platform: 'mobile' | 'web'): Diagnosti
     }
 
     for (const child of children) {
-      walk(child);
+      walk(child, false);
     }
   };
 
-  walk(root);
+  walk(root, true);
 
   for (const [key, count] of keyCounts) {
     if (count > 1) {

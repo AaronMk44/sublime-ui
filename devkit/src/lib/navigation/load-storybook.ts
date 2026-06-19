@@ -65,6 +65,18 @@ function entryToNode(entry: EntryLike, key: string): RouteNode {
   if (entry.kind === 'link') {
     // A link carries its own options (title/icon) but the format and children
     // come from the linked book. Params are lost at runtime → default `void`.
+    // A link whose target is not a book() is carried as a `linkError` so
+    // `validate` reports a clean `bad-link` diagnostic (rather than throwing an
+    // opaque "Cannot convert undefined to object" deep in the walk).
+    if (!isBookDef(entry.book)) {
+      return {
+        key,
+        kind: 'book',
+        options: { ...(entry.options ?? {}) },
+        children: [],
+        linkError: `link("${key}") does not reference a book().`,
+      };
+    }
     return bookToNode(entry.book, key, entry.options ?? {});
   }
   return {
