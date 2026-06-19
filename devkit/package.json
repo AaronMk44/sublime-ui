@@ -27,7 +27,8 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit && npm run typecheck:fixture",
     "typecheck:fixture": "tsc -p test/fixtures/nav-app/tsconfig.json",
-    "test": "vitest run",
+    "test": "vitest run --exclude \"**/node_modules/**\" --exclude \"**/dist/**\" --exclude \"**/test/e2e/**\"",
+    "test:e2e": "vitest run test/e2e",
     "lint": "eslint src"
   },
   "dependencies": {
