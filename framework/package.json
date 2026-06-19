@@ -1,17 +1,40 @@
 {
   "name": "@sublime-ui/framework",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Laravel/Eloquent-style models, typed state, and a reactive data layer for cross-platform TypeScript apps.",
-  "keywords": ["sublime-ui", "framework", "react", "react-native", "redux", "model", "data-layer", "typescript", "cross-platform"],
+  "keywords": [
+    "sublime-ui",
+    "framework",
+    "react",
+    "react-native",
+    "redux",
+    "model",
+    "data-layer",
+    "typescript",
+    "cross-platform"
+  ],
   "homepage": "https://sublime-ui.github.io/sublime-ui/",
   "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
-  "repository": { "type": "git", "url": "git+https://github.com/sublime-ui/sublime-ui.git", "directory": "framework" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sublime-ui/sublime-ui.git",
+    "directory": "framework"
+  },
   "license": "MIT",
   "author": "Aaron Mkandawire",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",

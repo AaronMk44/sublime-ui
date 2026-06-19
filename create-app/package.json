@@ -1,17 +1,33 @@
 {
   "name": "@sublime-ui/create-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scaffold a new Sublime UI app — npm create @sublime-ui/app my-app.",
-  "keywords": ["sublime-ui", "create", "scaffold", "starter", "cross-platform"],
+  "keywords": [
+    "sublime-ui",
+    "create",
+    "scaffold",
+    "starter",
+    "cross-platform"
+  ],
   "homepage": "https://sublime-ui.github.io/sublime-ui/",
   "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
-  "repository": { "type": "git", "url": "git+https://github.com/sublime-ui/sublime-ui.git", "directory": "create-app" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sublime-ui/sublime-ui.git",
+    "directory": "create-app"
+  },
   "license": "MIT",
   "author": "Aaron Mkandawire",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
-  "bin": { "create-app": "./dist/index.js" },
-  "files": ["dist"],
+  "bin": {
+    "create-app": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
@@ -19,7 +35,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@sublime-ui/devkit": "^0.1.0"
+    "@sublime-ui/devkit": "^0.1.1"
   },
   "devDependencies": {
     "@types/node": "^22"

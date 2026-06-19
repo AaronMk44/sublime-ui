@@ -1,18 +1,42 @@
 {
   "name": "@sublime-ui/library",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tokens-first cross-platform design system — one theme drives MUI (web) and React Native Paper (mobile).",
-  "keywords": ["sublime-ui", "design-system", "mui", "react-native-paper", "theme", "tokens", "components", "cross-platform", "typescript"],
+  "keywords": [
+    "sublime-ui",
+    "design-system",
+    "mui",
+    "react-native-paper",
+    "theme",
+    "tokens",
+    "components",
+    "cross-platform",
+    "typescript"
+  ],
   "homepage": "https://sublime-ui.github.io/sublime-ui/",
   "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
-  "repository": { "type": "git", "url": "git+https://github.com/sublime-ui/sublime-ui.git", "directory": "library" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sublime-ui/sublime-ui.git",
+    "directory": "library"
+  },
   "license": "MIT",
   "author": "Aaron Mkandawire",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "react-native": "./src/index.ts",
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
@@ -28,11 +52,21 @@
     "@emotion/styled": ">=11"
   },
   "peerDependenciesMeta": {
-    "react-native": { "optional": true },
-    "react-native-paper": { "optional": true },
-    "@mui/material": { "optional": true },
-    "@emotion/react": { "optional": true },
-    "@emotion/styled": { "optional": true }
+    "react-native": {
+      "optional": true
+    },
+    "react-native-paper": {
+      "optional": true
+    },
+    "@mui/material": {
+      "optional": true
+    },
+    "@emotion/react": {
+      "optional": true
+    },
+    "@emotion/styled": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@emotion/react": "^11.13.3",

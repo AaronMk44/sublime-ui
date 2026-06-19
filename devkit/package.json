@@ -1,14 +1,30 @@
 {
   "name": "@sublime-ui/devkit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The Sublime UI CLI (sublime) — offline Android builds, code generators, the navigation compiler, and desktop tooling.",
-  "keywords": ["sublime-ui", "cli", "devkit", "codegen", "scaffolding", "electron-forge", "android", "react-native", "typescript"],
+  "keywords": [
+    "sublime-ui",
+    "cli",
+    "devkit",
+    "codegen",
+    "scaffolding",
+    "electron-forge",
+    "android",
+    "react-native",
+    "typescript"
+  ],
   "homepage": "https://sublime-ui.github.io/sublime-ui/",
   "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
-  "repository": { "type": "git", "url": "git+https://github.com/sublime-ui/sublime-ui.git", "directory": "devkit" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sublime-ui/sublime-ui.git",
+    "directory": "devkit"
+  },
   "license": "MIT",
   "author": "Aaron Mkandawire",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "sublime": "./dist/cli.js",
