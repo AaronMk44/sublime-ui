@@ -10,6 +10,7 @@ import { themeInit } from './commands/theme-init.js';
 import { buildNav } from './commands/build-nav.js';
 import { desktopDev } from './commands/desktop-dev.js';
 import { desktopBuild } from './commands/desktop-build.js';
+import { runInit } from './commands/init.js';
 import { log } from './util/log.js';
 
 const program = new Command();
@@ -31,6 +32,29 @@ program
   .description('Install/repair the build environment')
   .action(async () => {
     process.exit(await setupCommand());
+  });
+
+program
+  .command('init [dir]')
+  .description('Scaffold a new Sublime app (web/mobile/desktop)')
+  .option('--name <name>', 'app (npm package) name')
+  .option('--targets <list>', 'comma-separated: web,mobile,desktop')
+  .option('--no-install', 'skip npm install')
+  .option('--no-git', 'skip git init')
+  .option('--force', 'scaffold into a non-empty directory')
+  .option('-y, --yes', 'accept defaults, no prompts')
+  .action(async (dir: string | undefined, opts: {
+    name?: string; targets?: string; install: boolean; git: boolean; force?: boolean; yes?: boolean;
+  }) => {
+    process.exit(await runInit({
+      dir: dir ?? process.cwd(),
+      ...(opts.name !== undefined ? { name: opts.name } : {}),
+      ...(opts.targets !== undefined ? { targets: opts.targets } : {}),
+      install: opts.install,
+      git: opts.git,
+      force: opts.force ?? false,
+      yes: opts.yes ?? false,
+    }));
   });
 
 program
