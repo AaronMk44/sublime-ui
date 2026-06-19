@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { initApp, type Target } from '@sublime-ui/devkit';
 
 const ALL: Target[] = ['web', 'mobile', 'desktop'];
@@ -51,7 +52,7 @@ async function main(): Promise<void> {
   process.exit(code);
 }
 
-// Run only as a bin, not when imported by tests.
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run main() only when invoked directly as the bin, not when imported (tests).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   void main();
 }
