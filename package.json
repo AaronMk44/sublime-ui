@@ -20,7 +20,8 @@
     "library",
     "devkit",
     "ui",
-    "desktop"
+    "desktop",
+    "create-app"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
