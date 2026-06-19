@@ -22,6 +22,9 @@ export interface LinkDef<RM extends RouteMap = RouteMap> {
   readonly options: PageOptions;
 }
 
+// `any` here is the structural wildcard: Entry must accept a PageDef/LinkDef of
+// any param or route-map shape before the flattening pass narrows them.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Entry = PageDef<any> | LinkDef<any>;
 
 export type RouteMap = Record<string, unknown>;
