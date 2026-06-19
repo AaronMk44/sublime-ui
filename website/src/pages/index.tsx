@@ -7,8 +7,31 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 // the /docs/* pages use the Docusaurus chrome. Internal links are wired via the
 // %DOCS% / %GH% placeholders below so the baseUrl is applied correctly.
 const MARKUP = String.raw`
-<div style="background:#E7E8EB; min-height:100vh;">
-<div style="max-width:1180px; margin:0 auto; padding:0 28px;">
+<div class="su-landing" style="background:#E7E8EB; min-height:100vh;">
+<style>
+.su-landing { overflow-x: hidden; }
+.su-landing *, .su-landing *::before, .su-landing *::after { box-sizing: border-box; }
+.su-landing img, .su-landing svg, .su-landing pre { max-width: 100%; }
+/* Tablet and below: collapse every multi-column grid to one column, scale type,
+   shrink the dark full-bleed band, and drop the secondary nav links. */
+@media (max-width: 860px) {
+  .su-landing [style*="grid-template-columns"] { grid-template-columns: 1fr !important; gap: 26px !important; }
+  .su-landing h1 { font-size: 36px !important; }
+  .su-landing h2 { font-size: 27px !important; }
+  .su-nav-links { display: none !important; }
+  .su-dark-band { padding: 52px 24px !important; }
+  .su-landing #desktop { margin-left: 0 !important; margin-right: 0 !important; }
+}
+/* Phones: tighter type, tighter gutters, smaller code. */
+@media (max-width: 520px) {
+  .su-landing h1 { font-size: 29px !important; }
+  .su-landing h2 { font-size: 24px !important; }
+  .su-container { padding-left: 18px !important; padding-right: 18px !important; }
+  .su-landing pre { font-size: 12px !important; }
+  .su-landing [style*="padding:64px"] { padding: 40px 22px !important; }
+}
+</style>
+<div class="su-container" style="max-width:1180px; margin:0 auto; padding:0 28px;">
 
   <nav style="display:flex; align-items:center; justify-content:space-between; padding:22px 4px;">
     <a href="%DOCS%" style="display:flex; align-items:center; gap:13px;">
@@ -19,7 +42,7 @@ const MARKUP = String.raw`
       <span style="font-family:'Sora'; font-size:21px; font-weight:800; letter-spacing:-0.03em;"><span style="color:#1E1B16;">Sublime</span> <span style="color:#E07A0B;">UI</span></span>
     </a>
     <div style="display:flex; align-items:center; gap:34px;">
-      <div style="display:flex; align-items:center; gap:30px; font-family:'Manrope'; font-size:14.5px; font-weight:600; color:#5A5750;">
+      <div class="su-nav-links" style="display:flex; align-items:center; gap:30px; font-family:'Manrope'; font-size:14.5px; font-weight:600; color:#5A5750;">
         <a href="%DOCS%">Docs</a>
         <a href="#framework">Framework</a>
         <a href="#navigation">Navigation</a>
@@ -145,7 +168,7 @@ const MARKUP = String.raw`
   </section>
 
   <section id="desktop" style="margin:20px -28px 0; padding:0;">
-    <div style="background:radial-gradient(120% 120% at 80% 0%, #232019 0%, #15130F 60%); padding:84px 56px;">
+    <div class="su-dark-band" style="background:radial-gradient(120% 120% at 80% 0%, #232019 0%, #15130F 60%); padding:84px 56px;">
       <div style="max-width:1124px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;">
         <div>
           <div style="font-family:'IBM Plex Mono'; font-size:12px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:#C98A3C; margin-bottom:16px;">Native bridge</div>
@@ -212,7 +235,7 @@ const MARKUP = String.raw`
       <h2 style="font-family:'Sora'; font-size:38px; font-weight:800; letter-spacing:-0.03em; color:#1E1B16; margin:0 0 12px;">Build once · ship everywhere.</h2>
       <p style="font-family:'Manrope'; font-size:17px; line-height:1.55; color:#6B5E45; margin:0 auto 34px; max-width:480px;">Spin up a fully-wired cross-platform workspace in one command.</p>
       <div style="display:inline-flex; align-items:center; gap:16px; background:#15130F; border-radius:13px; padding:16px 20px; box-shadow:0 16px 36px -16px rgba(20,28,48,0.4);">
-        <span style="font-family:'IBM Plex Mono'; font-size:15px; color:#D8D1C4;"><span style="color:#C98A3C;">$</span> npm create sublime-ui@latest</span>
+        <span style="font-family:'IBM Plex Mono'; font-size:15px; color:#D8D1C4;"><span style="color:#C98A3C;">$</span> npm create @sublime-ui/app</span>
       </div>
     </div>
   </section>
