@@ -5,6 +5,7 @@ export interface GeneratorConfig {
   modelsDir: string;
   componentsDir: string;
   themeDir: string;
+  navigationDir: string;
   importAlias: string;
 }
 
@@ -12,6 +13,7 @@ export const DEFAULT_CONFIG: GeneratorConfig = {
   modelsDir: 'src/models',
   componentsDir: 'src/components',
   themeDir: 'src/theme',
+  navigationDir: 'src/navigation',
   importAlias: '@sublime-ui',
 };
 

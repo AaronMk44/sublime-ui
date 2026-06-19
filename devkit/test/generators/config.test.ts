@@ -18,6 +18,13 @@ describe('loadConfig', () => {
     expect(cfg.modelsDir).toBe('app/models');
     expect(cfg.componentsDir).toBe(DEFAULT_CONFIG.componentsDir);
   });
+  it('defaults navigationDir to src/navigation', () => {
+    expect(loadConfig(dir).navigationDir).toBe('src/navigation');
+  });
+  it('merges navigationDir override', () => {
+    writeFileSync(join(dir, 'sublime.config.json'), JSON.stringify({ navigationDir: 'app/nav' }));
+    expect(loadConfig(dir).navigationDir).toBe('app/nav');
+  });
   it('ignores unknown keys', () => {
     writeFileSync(join(dir, 'sublime.config.json'), JSON.stringify({ nope: 1, themeDir: 'theme' }));
     const cfg = loadConfig(dir);
