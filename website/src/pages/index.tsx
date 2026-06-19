@@ -259,7 +259,7 @@ export default function Home(): React.ReactElement {
   const html = MARKUP.split('%DOCS%')
     .join(docs)
     .split('%GH%')
-    .join('https://github.com/AaronMk44/sublime-ui')
+    .join('https://github.com/sublime-ui/sublime-ui')
     // Generic fallbacks so the page never drops to serif if a webfont is slow/missing.
     .split("font-family:'Sora'")
     .join("font-family:'Sora', system-ui, sans-serif")

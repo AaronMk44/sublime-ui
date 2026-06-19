@@ -7,10 +7,10 @@ const config: Config = {
   tagline: 'Write the non-UI parts once. Run on mobile, web, and desktop — in TypeScript.',
   favicon: 'img/favicon.svg',
 
-  // GitHub Pages (project site at https://AaronMk44.github.io/sublime-ui/)
-  url: 'https://AaronMk44.github.io',
+  // GitHub Pages (project site at https://sublime-ui.github.io/sublime-ui/)
+  url: 'https://sublime-ui.github.io',
   baseUrl: '/sublime-ui/',
-  organizationName: 'AaronMk44',
+  organizationName: 'sublime-ui',
   projectName: 'sublime-ui',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
@@ -31,7 +31,7 @@ const config: Config = {
         docs: {
           routeBasePath: '/docs', // landing page owns '/'
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/AaronMk44/sublime-ui/tree/main/website/',
+          editUrl: 'https://github.com/sublime-ui/sublime-ui/tree/main/website/',
         },
         blog: false,
         theme: { customCss: './src/css/custom.css' },
@@ -46,7 +46,7 @@ const config: Config = {
       logo: { alt: 'Sublime UI', src: 'img/logo.svg' },
       items: [
         { type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs' },
-        { href: 'https://github.com/AaronMk44/sublime-ui', label: 'GitHub', position: 'right' },
+        { href: 'https://github.com/sublime-ui/sublime-ui', label: 'GitHub', position: 'right' },
       ],
     },
     footer: {
@@ -63,7 +63,7 @@ const config: Config = {
         },
         {
           title: 'More',
-          items: [{ label: 'GitHub', href: 'https://github.com/AaronMk44/sublime-ui' }],
+          items: [{ label: 'GitHub', href: 'https://github.com/sublime-ui/sublime-ui' }],
         },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Sublime UI · build once · ship everywhere.`,
