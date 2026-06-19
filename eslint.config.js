@@ -19,5 +19,17 @@ export default [
       ],
     },
   },
+  {
+    // The desktop native-bridge surface mandates `any` in a few interface
+    // signatures (the spec fixes the IPC listener as `(e, ...a: any[]) => any`
+    // and the registry/types entries as `(...a: any[]) => any`) so the generic
+    // `native:invoke` channel can carry arbitrary, structured-clone-safe
+    // payloads. Scope the relaxation to the desktop package only — the library
+    // package keeps `no-explicit-any` enforced.
+    files: ['desktop/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
   prettier,
 ];
