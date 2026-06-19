@@ -106,14 +106,16 @@ export function renderNative(root: RouteNode, opts: RenderNativeOptions): string
 
   return (
     `${header}\n` +
+    `import type { ReactNode } from 'react';\n` +
     `import { NavigationContainer } from '@react-navigation/native';\n` +
     `${factoryImports}\n` +
-    `import { NavProvider, useNativeNav } from '@sublime-ui/ui';\n` +
+    `import { NavProvider } from '@sublime-ui/ui/navigation';\n` +
+    `import { useNativeNav } from '@sublime-ui/ui/navigation/bridge.native';\n` +
     `import { ${screenImport} } from '${opts.screensImport}';\n` +
     `\n` +
     `${navigatorBlocks.join('\n\n')}\n` +
     `\n` +
-    `function NavBridge({ children }: { children: React.ReactNode }) {\n` +
+    `function NavBridge({ children }: { children: ReactNode }) {\n` +
     `  const nav = useNativeNav();\n` +
     `  return <NavProvider value={nav}>{children}</NavProvider>;\n` +
     `}\n` +

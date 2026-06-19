@@ -29,4 +29,24 @@ describe('renderNative', () => {
     expect(out).toContain('NavProvider');
     expect(out).toContain('useNativeNav');
   });
+
+  it('imports NavProvider from the navigation subpath barrel', () => {
+    const out = renderNative(tree as any, { screensImport: './screens' });
+    expect(out).toContain("import { NavProvider } from '@sublime-ui/ui/navigation';");
+    // NavProvider is NOT exported from the root entry.
+    expect(out).not.toContain("from '@sublime-ui/ui';");
+  });
+
+  it('imports useNativeNav directly from the platform bridge module', () => {
+    const out = renderNative(tree as any, { screensImport: './screens' });
+    expect(out).toContain(
+      "import { useNativeNav } from '@sublime-ui/ui/navigation/bridge.native';",
+    );
+  });
+
+  it('imports ReactNode explicitly instead of referencing the global React namespace', () => {
+    const out = renderNative(tree as any, { screensImport: './screens' });
+    expect(out).toContain("import type { ReactNode } from 'react';");
+    expect(out).not.toContain('React.ReactNode');
+  });
 });
