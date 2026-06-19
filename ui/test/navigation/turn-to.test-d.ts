@@ -1,11 +1,9 @@
 import { NavProvider, useNav } from '../../src/navigation';
-
-// A concrete generated `AppRoutes` (what `build:nav` emits into `routes.d.ts`):
-// `home` takes no params (void); `product` carries `{ id: number }`.
-type AppRoutes = {
-  home: void;
-  product: { id: number };
-};
+// Import the ACTUAL generated route map that `build:nav` emits — the same
+// `routes.d.ts` the devkit `typecheck:fixture` script compiles. This makes the
+// type test verify `turnTo` against real generator output (so an erased `void`
+// for `product` would fail here), not a hand-written fiction.
+import type { AppRoutes } from '../../../devkit/test/fixtures/nav-app/src/navigation/routes';
 
 // `useNav` is a hook; exercise its typed surface inside a component body. The
 // call is never executed — vitest's `--typecheck` only type-checks this file.

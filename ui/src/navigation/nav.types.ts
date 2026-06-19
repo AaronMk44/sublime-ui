@@ -1,5 +1,3 @@
-import type { RouteMap } from './types';
-
 export interface Nav {
   turnTo(name: string, params?: unknown): void;
   turnBack(): void;
@@ -9,7 +7,11 @@ export interface Nav {
 
 type NoParams<P> = [P] extends [void] ? true : P extends undefined ? true : false;
 
-export interface TypedNav<RM extends RouteMap> {
+// `RM extends object` (not `Record<string, unknown>`) so a generated `interface
+// AppRoutes { ... }` satisfies it. TypeScript interfaces lack an implicit index
+// signature and so do NOT extend `Record<string, unknown>`, but the route map is
+// always a concrete object type here, and `keyof`/indexing work on either.
+export interface TypedNav<RM extends object> {
   turnTo<K extends keyof RM & string>(
     ...args: NoParams<RM[K]> extends true ? [name: K] : [name: K, params: RM[K]]
   ): void;

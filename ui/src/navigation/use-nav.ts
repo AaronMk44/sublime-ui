@@ -8,7 +8,7 @@ export function NavProvider(props: { value: Nav; children: ReactNode }) {
   return createElement(NavContext.Provider, { value: props.value }, props.children);
 }
 
-export function useNav<RM extends RouteMap = RouteMap>(): TypedNav<RM> {
+export function useNav<RM extends object = RouteMap>(): TypedNav<RM> {
   const nav = useContext(NavContext);
   if (nav === null) throw new Error('useNav() must be used within <Navigation> (NavProvider missing)');
   return nav as unknown as TypedNav<RM>;
