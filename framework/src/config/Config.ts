@@ -28,7 +28,7 @@ export function configureSublime(config: SublimeConfig): void {
 
 export function getConfig(): SublimeConfig {
   if (current === null) {
-    throw new Error(
+    throw new ConfigError(
       'Sublime is not configured. Call configureSublime({ platform, baseURL?, tokenProvider?, databaseAdapter?, storageAdapter? }) at app startup.',
     );
   }
