@@ -1,4 +1,4 @@
-import { getConfig } from '../config/Config.js';
+import { getHttpConfig } from '../config/Config.js';
 import { ApiError } from './ApiError.js';
 import type { ApiResponse } from '../entities/ApiResponse.js';
 
@@ -9,7 +9,7 @@ export interface RequestConfig {
 }
 
 async function request<T>(config: RequestConfig): Promise<ApiResponse<T>> {
-  const { baseURL, tokenProvider } = getConfig();
+  const { baseURL, tokenProvider } = getHttpConfig();
   const fullUrl = `${baseURL}${config.url}`;
   const token = await tokenProvider();
 
