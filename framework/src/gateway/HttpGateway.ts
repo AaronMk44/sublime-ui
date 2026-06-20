@@ -1,3 +1,7 @@
+import { http, type RequestConfig } from './http.js';
+import { HttpError } from './HttpError.js';
+import type { Gateway, RequestCapableGateway, Row, Id } from './Gateway.js';
+import type { GatewayDeps } from './GatewayDeps.js';
 import type { Query, QueryFilter, QuerySort } from './Query.js';
 
 // NOTE: The HttpGateway class is added to this file in Phase D and imports the
@@ -54,3 +58,49 @@ function filterKey(field: string, op: string): string {
 function sortToken(s: QuerySort): string {
   return s.dir === 'desc' ? `-${s.field}` : s.field;
 }
+
+/**
+ * REST strategy. Returns RAW rows (http.request unwraps the envelope) and throws
+ * typed DataErrors. show() maps a 404 to null (absence is not a failure). The
+ * only request-capable gateway: Model.call() routes here.
+ */
+export class HttpGateway implements RequestCapableGateway {
+  constructor(private readonly deps: GatewayDeps) {}
+
+  private get resource(): string {
+    return this.deps.resource;
+  }
+
+  index(query?: Query): Promise<Row[]> {
+    return http.request<Row[]>({ url: `${this.resource}${toQueryString(query)}` });
+  }
+
+  async show(id: Id): Promise<Row | null> {
+    try {
+      return await http.request<Row>({ url: `${this.resource}/${id}` });
+    } catch (e) {
+      if (e instanceof HttpError && e.status === 404) return null;
+      throw e;
+    }
+  }
+
+  create(body: Row): Promise<Row> {
+    return http.request<Row>({ url: this.resource, method: 'POST', body });
+  }
+
+  update(id: Id, body: Row): Promise<Row> {
+    return http.request<Row>({ url: `${this.resource}/${id}`, method: 'PUT', body });
+  }
+
+  async destroy(id: Id): Promise<void> {
+    await http.request<unknown>({ url: `${this.resource}/${id}`, method: 'DELETE' });
+  }
+
+  request<T>(config: RequestConfig): Promise<T> {
+    return http.request<T>(config);
+  }
+}
+
+// Compile-time guard: HttpGateway satisfies the Gateway interface.
+const _typecheck: new (deps: GatewayDeps) => Gateway = HttpGateway;
+void _typecheck;
