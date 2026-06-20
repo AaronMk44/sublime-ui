@@ -1,6 +1,6 @@
 {
   "name": "@sublime-ui/desktop",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Electron desktop packaging and a secure native bridge (defineNative/useNative over one IPC channel) for Sublime UI apps.",
   "keywords": [
     "sublime-ui",

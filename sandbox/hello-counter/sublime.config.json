@@ -1,0 +1,10 @@
+{
+  "modelsDir": "src/models",
+  "componentsDir": "src/components",
+  "themeDir": "src/theme",
+  "navigationDir": "src/navigation",
+  "importAlias": "@sublime-ui",
+  "desktop": {
+    "dir": "desktop"
+  }
+}
