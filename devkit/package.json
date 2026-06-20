@@ -1,6 +1,6 @@
 {
   "name": "@sublime-ui/devkit",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "description": "The Sublime UI CLI (sublime) — offline Android builds, code generators, the navigation compiler, and desktop tooling.",
   "keywords": [
     "sublime-ui",
