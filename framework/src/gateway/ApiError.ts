@@ -1,21 +1,14 @@
-export interface ApiErrorOptions {
-  status: number;
-  errors: unknown;
-  url: string;
-}
+/**
+ * Back-compat shim. `ApiError` was renamed to `HttpError` in 0.2.0; this module
+ * re-exports the new class under both names so existing imports and
+ * `instanceof ApiError` keep working. The runtime `.name` is now 'HttpError'.
+ */
+import { HttpError } from './HttpError.js';
 
-/** The single error type thrown by every framework data call. */
-export class ApiError extends Error {
-  readonly status: number;
-  readonly errors: unknown;
-  readonly url: string;
+export { HttpError } from './HttpError.js';
+export type { HttpErrorOptions } from './HttpError.js';
+export type { HttpErrorOptions as ApiErrorOptions } from './HttpError.js';
 
-  constructor(message: string, opts: ApiErrorOptions) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = opts.status;
-    this.errors = opts.errors;
-    this.url = opts.url;
-    Object.setPrototypeOf(this, ApiError.prototype);
-  }
-}
+/** `ApiError` is the former name for {@link HttpError}; kept as a value+type alias. */
+export const ApiError = HttpError;
+export type ApiError = HttpError;

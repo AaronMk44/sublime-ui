@@ -33,7 +33,7 @@ describe('http.request', () => {
   it('throws ApiError on non-2xx with status', async () => {
     mockFetch(() => ({ status: 404, json: { success: false, message: 'Not found', data: null, errors: { id: ['missing'] } } }));
     await expect(http.request({ url: '/users/9' })).rejects.toMatchObject({
-      name: 'ApiError', status: 404, url: 'https://api.example.com/users/9',
+      name: 'HttpError', status: 404, url: 'https://api.example.com/users/9',
     });
   });
 
