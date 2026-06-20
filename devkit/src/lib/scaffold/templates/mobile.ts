@@ -72,25 +72,42 @@ export { TaskDetail } from '../screens/mobile/TaskDetail.native';
 }
 
 export function renderMobileEntry(): string {
-  return `import { AppRegistry } from 'react-native';
+  return `import { registerRootComponent } from 'expo';
 import { App } from './App.native';
-import { name as appName } from '../app.json';
 
-AppRegistry.registerComponent(appName, () => App);
+registerRootComponent(App);
 `;
 }
 
 export function renderMobileApp(): string {
-  return `import { SublimeProvider } from '@sublime-ui/library';
+  return `import { Provider } from 'react-redux';
+import { store } from '@sublime-ui/framework';
+import { SublimeProvider } from '@sublime-ui/library';
 import { Navigation } from '../src/navigation';
 import { tokens } from '../src/theme/tokens';
 
 export function App() {
   return (
-    <SublimeProvider tokens={tokens}>
-      <Navigation />
-    </SublimeProvider>
+    <Provider store={store}>
+      <SublimeProvider tokens={tokens}>
+        <Navigation />
+      </SublimeProvider>
+    </Provider>
   );
 }
+`;
+}
+
+export function renderMetroConfig(): string {
+  return `const { getDefaultConfig } = require('expo/metro-config');
+
+/** @type {import('expo/metro-config').MetroConfig} */
+const config = getDefaultConfig(__dirname);
+
+// @sublime-ui/* ship an \`exports\` map and no legacy \`main\`; Metro must honor
+// package "exports" to resolve them on React Native.
+config.resolver.unstable_enablePackageExports = true;
+
+module.exports = config;
 `;
 }

@@ -11,16 +11,26 @@ describe('app templates', () => {
     expect(pkg.private).toBe(true);
     expect(pkg.dependencies['@sublime-ui/framework']).toMatch(/^\^/);
     expect(pkg.dependencies['@sublime-ui/desktop']).toMatch(/^\^/);
+    // react-redux ships on every target — Model.rxAll/rxFind use useSelector.
+    expect(pkg.dependencies['react-redux']).toMatch(/^\^/);
     expect(pkg.scripts['dev:web']).toContain('vite');
     expect(pkg.scripts['build:nav']).toBe('sublime build:nav');
     expect(pkg.scripts['dev:desktop']).toBe('sublime desktop:dev');
     expect(pkg.scripts['build:desktop']).toBe('sublime desktop:build');
+  });
+  it('package.json points Expo main at the mobile entry only with mobile', () => {
+    const withMobile = JSON.parse(renderAppPackageJson('my-app', ['web', 'mobile']));
+    expect(withMobile.main).toBe('mobile/index.js');
+    const webOnly = JSON.parse(renderAppPackageJson('my-app', ['web']));
+    expect(webOnly.main).toBeUndefined();
   });
   it('package.json omits desktop dep + scripts when desktop not selected', () => {
     const pkg = JSON.parse(renderAppPackageJson('my-app', ['web']));
     expect(pkg.dependencies['@sublime-ui/desktop']).toBeUndefined();
     expect(pkg.scripts['dev:desktop']).toBeUndefined();
     expect(pkg.dependencies['react-native']).toBeUndefined();
+    // react-redux is still present (base dep) even for a web-only app.
+    expect(pkg.dependencies['react-redux']).toMatch(/^\^/);
   });
   it('sublime.config.json includes a desktop block only with desktop', () => {
     expect(JSON.parse(renderSublimeConfig(['web'])).desktop).toBeUndefined();

@@ -8,6 +8,13 @@ export default defineConfig({
     'src/mobile.ts',
     'src/createDatabaseAdapter.web.ts',
     'src/createDatabaseAdapter.native.ts',
+    // With `bundle: false` every internal module that the entries import with a
+    // relative `./…js` specifier must itself be an entry, or tsup never emits it
+    // and the published dist references files that don't exist. The sqlite/*
+    // modules are imported by index/desktop/mobile, so they must ship.
+    'src/sqlite/buildSelect.ts',
+    'src/sqlite/SqliteAdapter.ts',
+    'src/sqlite/SqliteDriver.ts',
   ],
   format: ['esm'],
   dts: true,

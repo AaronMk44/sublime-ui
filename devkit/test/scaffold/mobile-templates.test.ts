@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   renderMobileTaskList, renderMobileTaskDetail, renderStorybookNative, renderMobileScreensBarrel,
-  renderMobileEntry, renderMobileApp,
+  renderMobileEntry, renderMobileApp, renderMetroConfig,
 } from '../../src/lib/scaffold/templates/mobile.js';
 
 describe('mobile templates', () => {
@@ -30,8 +30,27 @@ describe('mobile templates', () => {
     expect(src).toContain("export { TaskList } from '../screens/mobile/TaskList.native'");
     expect(src).toContain("export { TaskDetail } from '../screens/mobile/TaskDetail.native'");
   });
-  it('mobile entry registers the app component', () => {
-    expect(renderMobileEntry()).toContain('AppRegistry');
-    expect(renderMobileApp()).toContain('SublimeProvider');
+  it('mobile entry wires Expo via registerRootComponent', () => {
+    const entry = renderMobileEntry();
+    // Expo's helper sets up the root component so the mobile target boots from
+    // the project entry instead of expo/AppEntry.js.
+    expect(entry).toContain("import { registerRootComponent } from 'expo';");
+    expect(entry).toContain("import { App } from './App.native';");
+    expect(entry).toContain('registerRootComponent(App);');
+    expect(entry).not.toContain('AppRegistry');
+  });
+  it('mobile App wraps the tree in the Redux Provider + SublimeProvider', () => {
+    const app = renderMobileApp();
+    expect(app).toContain('SublimeProvider');
+    // Model.rxAll/rxFind need a Redux <Provider store={store}>.
+    expect(app).toContain("import { Provider } from 'react-redux';");
+    expect(app).toContain("import { store } from '@sublime-ui/framework';");
+    expect(app).toContain('<Provider store={store}>');
+  });
+  it('metro config enables package exports for @sublime-ui/* resolution', () => {
+    const cfg = renderMetroConfig();
+    expect(cfg).toContain("const { getDefaultConfig } = require('expo/metro-config');");
+    expect(cfg).toContain('config.resolver.unstable_enablePackageExports = true;');
+    expect(cfg).toContain('module.exports = config;');
   });
 });

@@ -31,8 +31,14 @@ describe('web templates', () => {
     expect(src).toContain("export { TaskDetail } from '../screens/web/TaskDetail'");
   });
   it('web entry mounts the provider + generated Navigation', () => {
-    expect(renderWebMain()).toContain('SublimeProvider');
-    expect(renderWebMain()).toContain('Navigation');
+    const main = renderWebMain();
+    expect(main).toContain('SublimeProvider');
+    expect(main).toContain('Navigation');
+    // Model.rxAll/rxFind use react-redux useSelector, so the app must be wrapped
+    // in a Redux <Provider store={store}> sourced from the framework.
+    expect(main).toContain("import { Provider } from 'react-redux';");
+    expect(main).toContain("import { store } from '@sublime-ui/framework';");
+    expect(main).toContain('<Provider store={store}>');
     expect(renderWebIndexHtml('my-app')).toContain('my-app');
     expect(renderViteConfig()).toContain('@vitejs/plugin-react');
   });

@@ -30,7 +30,10 @@ describe('buildScaffoldPlan', () => {
     expect(p).toContain('src/navigation/screens.native.ts');
     expect(p).toContain('src/navigation/storybook.native.ts');
     expect(p).toContain('mobile/App.native.tsx');
+    expect(p).toContain('mobile/index.js');
     expect(p).toContain('app.json');
+    // Metro must honor package "exports" to resolve @sublime-ui/* on RN.
+    expect(p).toContain('metro.config.cjs');
   });
   it('desktop target adds the greeter service + desktop shell + reuses web', () => {
     const p = paths(['web', 'desktop']);

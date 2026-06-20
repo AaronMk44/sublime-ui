@@ -10,6 +10,7 @@ export function renderAppPackageJson(name: string, targets: Target[]): string {
     '@sublime-ui/library': SUBLIME_VERSIONS.library,
     '@sublime-ui/ui': SUBLIME_VERSIONS.ui,
     react: PEER_VERSIONS['react']!,
+    'react-redux': PEER_VERSIONS['react-redux']!,
   };
   const devDeps: Record<string, string> = {
     '@sublime-ui/devkit': SUBLIME_VERSIONS.framework, // shares the lockstep version
@@ -51,15 +52,19 @@ export function renderAppPackageJson(name: string, targets: Target[]): string {
     scripts['build:desktop'] = 'sublime desktop:build';
   }
 
-  const pkg = {
+  const pkg: Record<string, unknown> = {
     name,
     version: '0.0.0',
     private: true,
     type: 'module',
-    scripts,
-    dependencies: deps,
-    devDependencies: devDeps,
   };
+  // Expo defaults its entry to `expo/AppEntry.js`, which imports the project's
+  // `./App` — but this scaffold's entry lives at `mobile/index.js`. Point
+  // Expo's `main` at it so the mobile target actually mounts the app.
+  if (has(targets, 'mobile')) pkg['main'] = 'mobile/index.js';
+  pkg['scripts'] = scripts;
+  pkg['dependencies'] = deps;
+  pkg['devDependencies'] = devDeps;
   return JSON.stringify(pkg, null, 2) + '\n';
 }
 

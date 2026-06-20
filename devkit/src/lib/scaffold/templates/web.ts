@@ -90,15 +90,19 @@ export function renderWebIndexHtml(name: string): string {
 export function renderWebMain(): string {
   return `import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { store } from '@sublime-ui/framework';
 import { SublimeProvider } from '@sublime-ui/library';
 import { Navigation } from '../src/navigation';
 import { tokens } from '../src/theme/tokens';
 
 function App() {
   return (
-    <SublimeProvider tokens={tokens}>
-      <Navigation />
-    </SublimeProvider>
+    <Provider store={store}>
+      <SublimeProvider tokens={tokens}>
+        <Navigation />
+      </SublimeProvider>
+    </Provider>
   );
 }
 

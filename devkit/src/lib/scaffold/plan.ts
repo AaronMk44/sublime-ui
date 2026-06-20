@@ -11,7 +11,7 @@ import {
 } from './templates/web.js';
 import {
   renderMobileTaskList, renderMobileTaskDetail, renderStorybookNative, renderMobileScreensBarrel,
-  renderMobileEntry, renderMobileApp,
+  renderMobileEntry, renderMobileApp, renderMetroConfig,
 } from './templates/mobile.js';
 import {
   renderGreeterService, renderDesktopPackageJson, renderWebpackRules,
@@ -55,6 +55,7 @@ export function buildScaffoldPlan(opts: { name: string; targets: Target[] }): Sc
       { path: 'src/navigation/storybook.native.ts', contents: renderStorybookNative() },
       { path: 'mobile/index.js', contents: renderMobileEntry() },
       { path: 'mobile/App.native.tsx', contents: renderMobileApp() },
+      { path: 'metro.config.cjs', contents: renderMetroConfig() },
       {
         path: 'app.json',
         contents:
