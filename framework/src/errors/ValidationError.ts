@@ -5,7 +5,7 @@ export interface ValidationErrorOptions {
   cause?: unknown;
 }
 
-/** RESERVED for SP3 (per-field server validation). Thrown nowhere in SP1. */
+/** Thrown on HTTP 422 (per-field server validation); `fields` carries the server's per-field errors. */
 export class ValidationError extends DataError {
   readonly fields?: unknown;
 

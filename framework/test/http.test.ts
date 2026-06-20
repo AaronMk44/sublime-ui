@@ -83,7 +83,7 @@ describe('http.request', () => {
   });
 
   it('throws HttpError on invalid JSON body', async () => {
-    vi.stubGlobal('fetch', async () => ({ ok: true, status: 200, json: async () => { throw new SyntaxError('bad json'); } }) as Response);
+    vi.stubGlobal('fetch', async () => ({ ok: true, status: 200, json: async () => { throw new SyntaxError('bad json'); } }) as unknown as Response);
     const err = await http.request({ url: '/users' }).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(HttpError);
     expect((err as HttpError).status).toBe(200);
