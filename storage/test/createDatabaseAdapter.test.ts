@@ -24,3 +24,39 @@ describe('createDatabaseAdapter (web resolution)', () => {
     expect(adapter).toBeInstanceOf(IndexedDbAdapter);
   });
 });
+
+// storage/test/createDatabaseAdapter.test.ts — append (I2 adds the bridge-present case)
+import { vi } from 'vitest';
+import { SqliteAdapter } from '../src/sqlite/SqliteAdapter.js';
+
+describe('createDatabaseAdapter (web entry) — desktop bridge detection (I2)', () => {
+  function installBridge(): void {
+    (globalThis as unknown as { sublimeNative: { invoke: (m: string, method: string, a: unknown[]) => Promise<unknown> } }).sublimeNative = {
+      invoke: async (_mod, method) => {
+        switch (method) {
+          case 'exec':
+            return undefined;
+          case 'all':
+            return [];
+          case 'get':
+            return undefined;
+          case 'run':
+            return { changes: 0 };
+          default:
+            throw new Error(`unexpected method ${method}`);
+        }
+      },
+    };
+  }
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    delete (globalThis as unknown as { sublimeNative?: unknown }).sublimeNative;
+  });
+
+  it('returns a SQLite-over-IPC adapter when the desktop native bridge is present', () => {
+    installBridge();
+    const adapter = createDatabaseAdapter();
+    expect(adapter).toBeInstanceOf(SqliteAdapter);
+  });
+});

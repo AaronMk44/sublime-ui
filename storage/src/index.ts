@@ -14,6 +14,4 @@ export type { SqliteDriver } from './sqlite/SqliteDriver.js';
 export { IndexedDbAdapter, createIndexedDbAdapter } from './web.js';
 export { createExpoSqliteAdapter } from './mobile.js';
 export { createDatabaseAdapter } from './createDatabaseAdapter.web.js';
-// NOTE: `createDesktopSqliteAdapter` is NOT exported here — `./desktop.js` does
-// not exist until Task I2, which adds
-// `export { createDesktopSqliteAdapter } from './desktop.js';` to this barrel.
+export { createDesktopSqliteAdapter } from './desktop.js';
