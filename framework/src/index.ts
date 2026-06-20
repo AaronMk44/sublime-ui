@@ -45,6 +45,9 @@ export type {
   QuerySort,
   LegacyQuery,
 } from './gateway/Query.js';
+// Shared query evaluator (one operator-semantics oracle for InMemoryGateway and
+// the @sublime-ui/storage IndexedDB scan fallback).
+export { applyQuery } from './gateway/queryMatch.js';
 
 // --- DatabaseAdapter port (types only; adapters ship in @sublime-ui/storage) ---
 export type { DatabaseAdapter } from './gateway/DatabaseAdapter.js';
