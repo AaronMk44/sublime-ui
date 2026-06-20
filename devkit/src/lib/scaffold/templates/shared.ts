@@ -9,6 +9,7 @@ export class Task extends Model {
   declare name: string;
   declare done: boolean;
 }
+// In-memory by default. For REST: registerModel(Task, HttpGateway).
 registerModel(Task);
 `;
 }

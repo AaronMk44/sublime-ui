@@ -16,6 +16,7 @@ describe('makeModel', () => {
     expect(model).toContain('export class User extends Model {');
     expect(model).toContain('declare name: string;');
     expect(model).toContain('registerModel(User);');
+    expect(model).toContain('// In-memory by default. For REST: registerModel(User, HttpGateway).');
     const barrel = readFileSync(join(dir, 'src/models/index.ts'), 'utf8');
     expect(barrel).toContain("export * from './User.js';");
   });

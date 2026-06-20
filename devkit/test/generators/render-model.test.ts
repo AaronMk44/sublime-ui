@@ -18,6 +18,7 @@ describe('renderModel', () => {
     expect(out).toContain('declare id: number;');
     expect(out).toContain('declare name: string;');
     expect(out).toContain('registerModel(User);');
+    expect(out).toContain('// In-memory by default. For REST: registerModel(User, HttpGateway).');
   });
   it('always includes an id field even when none provided', () => {
     const out = renderModel({ className: 'Tag', resource: '/tags', importAlias: '@sublime-ui', fields: [] });

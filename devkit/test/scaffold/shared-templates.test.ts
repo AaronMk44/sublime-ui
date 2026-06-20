@@ -5,12 +5,13 @@ import {
 } from '../../src/lib/scaffold/templates/shared.js';
 
 describe('shared templates', () => {
-  it('Task model extends Model and registers itself', () => {
+  it('Task model extends Model and registers itself in-memory by default', () => {
     const src = renderTaskModel();
     expect(src).toContain("from '@sublime-ui/framework'");
     expect(src).toContain('export class Task extends Model');
     expect(src).toContain('registerModel(Task)');
     expect(src).toContain("resource = '/tasks'");
+    expect(src).toContain('// In-memory by default. For REST: registerModel(Task, HttpGateway).');
   });
   it('models barrel re-exports Task', () => {
     expect(renderModelsBarrel()).toContain("export * from './Task.js'");

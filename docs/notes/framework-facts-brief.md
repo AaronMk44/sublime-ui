@@ -21,10 +21,10 @@ export class User extends Model {
 }
 registerModel(User);
 ```
-- Async commands (throw `ApiError` on failure): `User.all()`, `User.find(id)`, `user.save()`, `user.delete()`, `User.call(...)` for custom endpoints.
+- Async commands (throw a typed `DataError` on real failure; absence is `null`, not an error): `User.all()`, `User.find(id)`, `user.save()`, `user.delete()`, `User.call(...)` for custom endpoints (HTTP-backed models only).
 - Reactive React hooks (cache-first; fetch + cache if missing): `User.rxAll()`, `User.rxFind(id)`.
-- `registerModel(Model)` wires a fetch-based Gateway (CRUD over `resource`) + an auto-registering Redux slice + a discovery registry. Casting keeps plain JSON in the store (`hydrate`/`toPlain`).
-- Gateway = API-only layer (REST today; a DB Gateway is roadmapped). `ApiResponse<T> = { success, message, data, errors }`.
+- `registerModel(Model)` wires an **in-memory** Gateway by default (the Redux slice is the source of truth — zero config). `registerModel(Model, HttpGateway)` uses REST; `registerModel(Model, DbGateway)` uses a local document DB. All three auto-register a Redux slice + a discovery registry; casting keeps plain JSON in the store (`hydrate`/`toPlain`).
+- Gateway = a pluggable storage **strategy** (`index/show/create/update/destroy`) returning raw rows and throwing a typed `DataError` (`HttpError`, `NetworkError`, `AuthError`, `NotFoundError`, `ConfigError`, `StorageError`; `ValidationError` reserved). `ApiResponse<T> = { success, message, data, errors }` is **HTTP-internal** — the REST gateway unwraps it; it is not part of the Model data contract.
 - Fields are declared with `declare` (set once, then queried); custom getters/derived values are normal class methods/getters.
 
 ## Library

@@ -1,5 +1,11 @@
 # Sublime UI — Framework App-Architecture Core (#2) — Design
 
+> **Superseded in part by SP1 (Storage-Agnostic Gateway).** The "Gateway =
+> API-only (REST today; DB Gateway roadmapped)" decision in this doc is
+> delivered and revised by SP1: `Model` now talks to a pluggable `Gateway`
+> interface with three strategies (in-memory default · REST · local DB). See
+> [`docs/superpowers/specs/2026-06-20-sublime-ui-storage-agnostic-gateway-design.md`](2026-06-20-sublime-ui-storage-agnostic-gateway-design.md).
+
 Date: 2026-06-18
 Status: Draft (pending written-spec review)
 

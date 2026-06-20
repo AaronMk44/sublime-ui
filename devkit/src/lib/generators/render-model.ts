@@ -18,6 +18,7 @@ export class ${opts.className} extends Model {
 ${declares}
 }
 
+// In-memory by default. For REST: registerModel(${opts.className}, HttpGateway).
 registerModel(${opts.className});
 `;
 }
