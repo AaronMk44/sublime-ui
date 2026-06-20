@@ -1,9 +1,0 @@
-{
-  "expo": {
-    "name": "hello-counter",
-    "slug": "hello-counter",
-    "android": {
-      "package": "com.sublime.hellocounter"
-    }
-  }
-}
