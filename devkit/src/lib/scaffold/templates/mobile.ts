@@ -1,7 +1,7 @@
 export function renderMobileTaskList(): string {
   return `import { Screen, Stack } from '@sublime-ui/ui';
 import { useNav } from '@sublime-ui/ui/navigation';
-import { Button } from 'react-native-paper';
+import { Text, Card } from '@sublime-ui/library';
 import { Task } from '../../models/Task';
 
 export function TaskList() {
@@ -10,11 +10,16 @@ export function TaskList() {
   return (
     <Screen>
       <Stack>
-        {tasks.map((t) => (
-          <Button key={t.id} onPress={() => nav.turnTo('task', { id: t.id })}>
-            {t.name}
-          </Button>
-        ))}
+        <Text variant="title">Tasks</Text>
+        {tasks.length === 0 ? (
+          <Text variant="body">No tasks yet — create one in your data layer to see it here.</Text>
+        ) : (
+          tasks.map((t) => (
+            <Card key={t.id} padded onPress={() => nav.turnTo('task', { id: t.id })}>
+              <Text variant="body">{t.name}</Text>
+            </Card>
+          ))
+        )}
       </Stack>
     </Screen>
   );
@@ -25,7 +30,7 @@ export function TaskList() {
 export function renderMobileTaskDetail(): string {
   return `import { Screen, Stack } from '@sublime-ui/ui';
 import { useNav } from '@sublime-ui/ui/navigation';
-import { Text, Button } from 'react-native-paper';
+import { Text, Button } from '@sublime-ui/library';
 import type { AppRoutes } from '../../navigation';
 import { Task } from '../../models/Task';
 
@@ -36,8 +41,8 @@ export function TaskDetail() {
   return (
     <Screen>
       <Stack>
-        <Text variant="headlineMedium">{task?.name ?? 'Loading…'}</Text>
-        <Button onPress={() => nav.turnBack()}>Back</Button>
+        <Text variant="title">{task?.name ?? 'Loading…'}</Text>
+        <Button variant="outline" onPress={() => nav.turnBack()}>Back</Button>
       </Stack>
     </Screen>
   );

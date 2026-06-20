@@ -55,7 +55,22 @@ export function renderDesktopPackageJson(name: string): string {
 export function renderWebpackRules(): string {
   return `import type { ModuleOptions } from 'webpack';
 
-export const rules: Required<ModuleOptions>['rules'] = [
+type Rules = Required<ModuleOptions>['rules'];
+
+// TypeScript + CSS — safe for every target (main, renderer, preload).
+const tsAndCss: Rules = [
+  {
+    test: /\\.tsx?$/,
+    exclude: /(node_modules|\\.webpack)/,
+    use: { loader: 'ts-loader', options: { transpileOnly: true } },
+  },
+  { test: /\\.css$/, use: ['style-loader', 'css-loader'] },
+];
+
+// Full rule set for the MAIN process. The asset-relocator-loader injects a
+// runtime \`__dirname\` reference (for native-module relocation); that is undefined
+// in the sandboxed renderer/preload and crashes them, so it must NOT run there.
+export const rules: Rules = [
   { test: /native_modules[/\\\\].+\\.node$/, use: 'node-loader' },
   {
     test: /[/\\\\]node_modules[/\\\\].+\\.(m?js|node)$/,
@@ -65,13 +80,11 @@ export const rules: Required<ModuleOptions>['rules'] = [
       options: { outputAssetBase: 'native_modules' },
     },
   },
-  {
-    test: /\\.tsx?$/,
-    exclude: /(node_modules|\\.webpack)/,
-    use: { loader: 'ts-loader', options: { transpileOnly: true } },
-  },
-  { test: /\\.css$/, use: ['style-loader', 'css-loader'] },
+  ...tsAndCss,
 ];
+
+// Renderer/preload run sandboxed (no Node) — TypeScript + CSS only.
+export const rendererRules: Rules = tsAndCss;
 `;
 }
 

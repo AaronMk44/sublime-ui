@@ -33,6 +33,10 @@ npm run build:mobile     # sublime build        → standalone offline APK
 npm run dev:mobile       # sublime build --debug → debug build (needs Metro)
 ```
 
+The finished `.apk` (or `.aab` with `--aab`) is copied into **`dist/mobile/`** at your
+project root, alongside the other platforms' outputs — see
+[Where your builds go](../getting-started/commands.md#where-your-builds-go).
+
 ## What "offline" means
 
 A **release** build (`sublime build` / `sublime build --release`) **embeds the

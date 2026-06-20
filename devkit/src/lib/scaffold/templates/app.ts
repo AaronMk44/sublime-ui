@@ -132,6 +132,10 @@ export function renderGitignore(): string {
     'android',
     'ios',
     '',
+    '# Desktop (Electron Forge) intermediate output (consolidated into dist/desktop)',
+    'desktop/out',
+    'desktop/.webpack',
+    '',
   ].join('\n');
 }
 

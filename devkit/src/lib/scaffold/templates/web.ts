@@ -1,6 +1,7 @@
 export function renderWebTaskList(): string {
   return `import { Screen, Stack } from '@sublime-ui/ui';
 import { useNav } from '@sublime-ui/ui/navigation';
+import { Text, Card } from '@sublime-ui/library';
 import { Task } from '../../models/Task';
 
 export function TaskList() {
@@ -9,11 +10,16 @@ export function TaskList() {
   return (
     <Screen>
       <Stack>
-        {tasks.map((t) => (
-          <button key={t.id} onClick={() => nav.turnTo('task', { id: t.id })}>
-            {t.name}
-          </button>
-        ))}
+        <Text variant="title">Tasks</Text>
+        {tasks.length === 0 ? (
+          <Text variant="body">No tasks yet — create one in your data layer to see it here.</Text>
+        ) : (
+          tasks.map((t) => (
+            <Card key={t.id} padded onPress={() => nav.turnTo('task', { id: t.id })}>
+              <Text variant="body">{t.name}</Text>
+            </Card>
+          ))
+        )}
       </Stack>
     </Screen>
   );
@@ -24,6 +30,7 @@ export function TaskList() {
 export function renderWebTaskDetail(): string {
   return `import { Screen, Stack } from '@sublime-ui/ui';
 import { useNav } from '@sublime-ui/ui/navigation';
+import { Text, Button } from '@sublime-ui/library';
 import type { AppRoutes } from '../../navigation';
 import { Task } from '../../models/Task';
 
@@ -34,8 +41,8 @@ export function TaskDetail() {
   return (
     <Screen>
       <Stack>
-        <h1>{task?.name ?? 'Loading…'}</h1>
-        <button onClick={() => nav.turnBack()}>Back</button>
+        <Text variant="title">{task?.name ?? 'Loading…'}</Text>
+        <Button variant="outline" onPress={() => nav.turnBack()}>Back</Button>
       </Stack>
     </Screen>
   );
@@ -109,6 +116,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  // All platforms write their build output under one \`dist/\` folder:
+  // web → dist/web, desktop → dist/desktop, mobile → dist/mobile.
+  build: { outDir: 'dist/web', emptyOutDir: true },
 });
 `;
 }

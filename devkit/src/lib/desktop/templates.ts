@@ -99,7 +99,7 @@ export const mainConfig: Configuration = {
 /** Renders `desktop/webpack.renderer.config.ts`. */
 export function renderWebpackRenderer(): string {
   return `import type { Configuration } from 'webpack';
-import { rules } from './webpack.rules';
+import { rendererRules } from './webpack.rules';
 
 // Entry points wire \`main_window\` and inject \`./src/main/preload.ts\` as its
 // preload, which the Webpack plugin surfaces as MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY.
@@ -114,7 +114,7 @@ export const rendererEntryPoints = [
 
 export const rendererConfig: Configuration = {
   module: {
-    rules,
+    rules: rendererRules,
   },
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],

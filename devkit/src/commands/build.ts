@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, writeFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync, statSync, mkdirSync, copyFileSync } from 'node:fs';
+import { join, basename } from 'node:path';
 import { ensurePortableJdk17 } from '../lib/jdk.js';
 import { resolveAndroidHome } from '../lib/probe.js';
 import { runGradleWithHealing } from '../lib/gradle.js';
@@ -85,7 +85,10 @@ export async function buildCommand(opts: {
   const task = gradleTaskFor({ release: opts.release, aab: opts.aab });
   await runGradleWithHealing({ androidDir, task, jdk17Home, androidHome });
 
-  // 4. Report artifact. (Reached only when the build succeeded.)
+  // 4. Report artifact, copied into the app-wide dist/ folder (dist/mobile) so
+  //    every platform's output lives in one place (web → dist/web, desktop →
+  //    dist/desktop, mobile → dist/mobile). (Reached only when the build succeeded.)
+  const dest = join(opts.project, 'dist', 'mobile');
   if (!opts.aab) {
     const variant: BuildVariant = opts.release ? 'release' : 'debug';
     const apk = findApk(opts.project, variant);
@@ -93,16 +96,22 @@ export async function buildCommand(opts: {
       log.error(`Build reported success but no ${variant} APK was found.`);
       return 1;
     }
-    const mb = (statSync(apk).size / (1024 * 1024)).toFixed(1);
-    log.success(`APK ready: ${apk} (${mb} MB)`);
+    mkdirSync(dest, { recursive: true });
+    const out = join(dest, basename(apk));
+    copyFileSync(apk, out);
+    const mb = (statSync(out).size / (1024 * 1024)).toFixed(1);
+    log.success(`APK ready: ${out} (${mb} MB)`);
   } else {
     const aab = findAab(opts.project);
     if (aab === null) {
       log.error('Build reported success but no AAB was found.');
       return 1;
     }
-    const mb = (statSync(aab).size / (1024 * 1024)).toFixed(1);
-    log.success(`AAB ready: ${aab} (${mb} MB)`);
+    mkdirSync(dest, { recursive: true });
+    const out = join(dest, basename(aab));
+    copyFileSync(aab, out);
+    const mb = (statSync(out).size / (1024 * 1024)).toFixed(1);
+    log.success(`AAB ready: ${out} (${mb} MB)`);
   }
   return 0;
 }

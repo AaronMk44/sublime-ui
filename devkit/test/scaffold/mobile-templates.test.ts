@@ -5,14 +5,17 @@ import {
 } from '../../src/lib/scaffold/templates/mobile.js';
 
 describe('mobile templates', () => {
-  it('mobile screens use Paper Text and the model', () => {
+  it('mobile screens use the design system and the model', () => {
     const list = renderMobileTaskList();
     // Screen/Stack from the package root; useNav from the /navigation subpath.
     expect(list).toContain("import { Screen, Stack } from '@sublime-ui/ui';");
     expect(list).toContain("import { useNav } from '@sublime-ui/ui/navigation';");
-    expect(list).toContain("from 'react-native-paper'");
+    // Sample screens showcase the design system (Text/Card), not raw Paper.
+    expect(list).toContain("from '@sublime-ui/library'");
+    expect(list).not.toContain("from 'react-native-paper'");
     expect(list).toContain('Task.rxAll()');
     const detail = renderMobileTaskDetail();
+    expect(detail).toContain("from '@sublime-ui/library'");
     expect(detail).toContain("import type { AppRoutes } from '../../navigation'");
     expect(detail).toContain('useNav<AppRoutes>()');
     expect(detail).toContain("nav.params<'task'>()");

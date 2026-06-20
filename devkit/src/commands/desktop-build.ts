@@ -1,6 +1,8 @@
 import { join } from 'node:path';
+import { existsSync, cpSync, mkdirSync } from 'node:fs';
 import { loadConfig } from '../lib/generators/config.js';
 import { runInherit } from '../util/exec.js';
+import { log } from '../util/log.js';
 
 /** Runs a process in `cwd` and resolves with its exit code. */
 export type DesktopRunner = (cmd: string, args: string[], cwd: string) => Promise<number>;
@@ -21,5 +23,18 @@ export async function desktopBuild(opts: {
   const cfg = loadConfig(opts.project);
   const desktopDir = join(opts.project, cfg.desktop?.dir ?? 'desktop');
   const runner = opts.runner ?? defaultRunner;
-  return runner('npm', ['run', 'make'], desktopDir);
+  const code = await runner('npm', ['run', 'make'], desktopDir);
+  if (code === 0) {
+    // Consolidate Forge's installers under the app-wide dist/ folder so every
+    // platform's output lives in one place (web → dist/web, desktop → dist/desktop,
+    // mobile → dist/mobile).
+    const made = join(desktopDir, 'out', 'make');
+    if (existsSync(made)) {
+      const dest = join(opts.project, 'dist', 'desktop');
+      mkdirSync(dest, { recursive: true });
+      cpSync(made, dest, { recursive: true });
+      log.success(`Desktop installers copied to ${dest}`);
+    }
+  }
+  return code;
 }

@@ -22,6 +22,10 @@ Electron Forge **makers** generate the installers:
 | macOS | `MakerZIP` | `.zip` |
 | Linux | `MakerDeb`, `MakerRpm` | `.deb`, `.rpm` |
 
+The installers are copied into **`dist/desktop/`** at your project root, alongside the
+other platforms' outputs (`dist/web`, `dist/mobile`) — see
+[Where your builds go](../getting-started/commands.md#where-your-builds-go).
+
 Two Forge plugins harden and complete the build:
 
 - **`plugin-auto-unpack-natives`** unpacks native Node modules from the asar — so a

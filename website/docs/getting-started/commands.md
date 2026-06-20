@@ -37,6 +37,112 @@ npm run typecheck          # if your app defines it; or: npx tsc --noEmit
 > `storybook.native.ts`, re-run `build:nav` (or keep `--watch` running) so the
 > generated routes and types stay in sync.
 
+## Copy-paste commands
+
+Each command in its own block — use the copy icon to grab just that one.
+
+### Create a project
+
+```bash
+npm create @sublime-ui/app@latest my-app
+```
+
+_Scaffold a new app (prompts for name + targets), then installs everything._
+
+### Develop (hot reload)
+
+```bash
+npm run dev:web
+```
+
+_Web app with hot reload (Vite)._
+
+```bash
+npm run dev:desktop
+```
+
+_Electron shell with HMR — renders the same web UI._
+
+```bash
+npm run dev:mobile
+```
+
+_Android debug build (run `sublime doctor` first)._
+
+### Build for release
+
+```bash
+npm run build:web
+```
+
+_Production web bundle → `dist/web/`._
+
+```bash
+npm run build:desktop
+```
+
+_Desktop installers → `dist/desktop/`._
+
+```bash
+npm run build:mobile
+```
+
+_Standalone offline Android APK → `dist/mobile/`._
+
+```bash
+npm run build:nav
+```
+
+_Compile the storybooks into typed navigation._
+
+### Generate code
+
+```bash
+npx sublime make:model Post --fields "title:string, body:string"
+```
+
+_Generate a `Model` (+ `registerModel`) and update the models barrel._
+
+```bash
+npx sublime make:component Card
+```
+
+_Generate a cross-platform component (types + web + native + index)._
+
+```bash
+npx sublime theme:init
+```
+
+_Scaffold design tokens (`tokens.json` + a typed `tokens.ts`)._
+
+### Navigation
+
+```bash
+npx sublime build:nav --watch
+```
+
+_Recompile typed navigation on every storybook change._
+
+### Mobile toolchain
+
+```bash
+npx sublime doctor
+```
+
+_Check the Android toolchain (Node, JDK 17, SDK, NDK, CMake)._
+
+```bash
+npx sublime setup
+```
+
+_Install the missing toolchain pieces._
+
+```bash
+npx sublime run
+```
+
+_Install + launch the built APK on a device or emulator._
+
 ## Create a project
 
 | Command | What it does |
@@ -65,6 +171,23 @@ Only the scripts for the targets you selected are present.
 
 All three targets follow the same shape: **`dev:<target>`** to run,
 **`build:<target>`** to package.
+
+### Where your builds go
+
+Every `build:*` command writes its final artifact into a single **`dist/`** folder
+at the project root — one subfolder per platform, so all your release outputs live
+in one place:
+
+| Command | Destination | Contents |
+| --- | --- | --- |
+| `npm run build:web` | **`dist/web/`** | Static site — `index.html` + hashed `assets/` |
+| `npm run build:desktop` | **`dist/desktop/`** | Installers — Squirrel `.exe`, `.zip`, `.deb`, `.rpm` |
+| `npm run build:mobile` | **`dist/mobile/`** | The signed `.apk` (or `.aab` when you pass `--aab`) |
+
+`dist/` is git-ignored. Desktop and mobile produce intermediate native build trees
+along the way (`desktop/out`, `desktop/.webpack`, `android/`) — those stay in place,
+but the finished artifacts are copied into `dist/` for you, so you only ever need to
+look in one folder.
 
 ## The `sublime` CLI
 

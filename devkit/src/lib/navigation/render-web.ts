@@ -126,7 +126,7 @@ export function renderWeb(root: RouteNode, opts: RenderWebOptions): string {
   return (
     `${header}\n` +
     `import type { ReactNode } from 'react';\n` +
-    `import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';\n` +
+    `import { HashRouter, Routes, Route, Outlet } from 'react-router-dom';\n` +
     `import { NavProvider } from '@sublime-ui/ui/navigation';\n` +
     `import { useWebNav } from '@sublime-ui/ui/navigation/bridge.web';\n` +
     `import { ${screenImport} } from '${opts.screensImport}';\n` +
@@ -172,14 +172,18 @@ export function renderWeb(root: RouteNode, opts: RenderWebOptions): string {
     `}\n` +
     `\n` +
     `export function Navigation() {\n` +
+    `  // HashRouter (not BrowserRouter) so routing works regardless of the page's\n` +
+    `  // file path — the browser at '/', a static host without rewrites, and the\n` +
+    `  // Electron renderer (served at '/main_window/index.html' in dev, 'file://' when\n` +
+    `  // packaged) all route off the URL hash.\n` +
     `  return (\n` +
-    `    <BrowserRouter>\n` +
+    `    <HashRouter>\n` +
     `      <NavBridge>\n` +
     `        <Routes>\n` +
     `${routesTree}\n` +
     `        </Routes>\n` +
     `      </NavBridge>\n` +
-    `    </BrowserRouter>\n` +
+    `    </HashRouter>\n` +
     `  );\n` +
     `}\n`
   );
