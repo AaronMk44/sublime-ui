@@ -43,8 +43,8 @@ describe('createModelSlice', () => {
     const { slice, apply, get } = make();
     apply(slice.actions.setStatus('loading'));
     expect(get().status).toBe('loading');
-    apply(slice.actions.setError({ name: 'ApiError', message: 'x', status: 500, errors: null, url: '/u' } as never));
+    apply(slice.actions.setError({ name: 'HttpError', message: 'x', code: 'http', status: 500, errors: null, url: '/u' } as never));
     expect(get().status).toBe('error');
-    expect(get().error).toMatchObject({ status: 500 });
+    expect(get().error).toMatchObject({ code: 'http' });
   });
 });

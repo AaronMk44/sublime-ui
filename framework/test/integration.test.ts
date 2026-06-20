@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Model, registerModel, configureSublime, store } from '../src/index.js';
+import { HttpGateway } from '../src/gateway/HttpGateway.js';
 import { resetConfig } from '../src/config/Config.js';
 
 class User extends Model {
@@ -14,7 +15,7 @@ class User extends Model {
     return this.call<User[]>({ url: '/users/expired', store: true, merge: 'replace' });
   }
 }
-registerModel(User as unknown as { name: string; resource?: string });
+registerModel(User as unknown as { name: string; resource?: string }, HttpGateway);
 
 describe('framework end-to-end (hand-written model)', () => {
   beforeEach(() => {

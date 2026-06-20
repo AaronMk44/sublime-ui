@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Model } from '../src/model/Model.js';
 import { ModelCollection } from '../src/model/ModelCollection.js';
-import { ApiError } from '../src/gateway/ApiError.js';
+import { DataError } from '../src/errors/DataError.js';
+import { HttpGateway } from '../src/gateway/HttpGateway.js';
 import { registerModel } from '../src/register.js';
 import { store } from '../src/store/store.js';
 import { configureSublime, resetConfig } from '../src/config/Config.js';
@@ -12,7 +13,7 @@ class Widget extends Model {
   declare name: string;
   get shout(): string { return this.name.toUpperCase(); }
 }
-registerModel(Widget as unknown as { name: string; resource?: string });
+registerModel(Widget as unknown as { name: string; resource?: string }, HttpGateway);
 
 function respond(json: unknown, status = 200) {
   vi.stubGlobal('fetch', async () => ({ ok: status < 300, status, json: async () => json } as Response));
@@ -66,10 +67,10 @@ describe('Model commands', () => {
     expect(state['widgets']!.items).toEqual([]);
   });
 
-  it('rejects with ApiError and records slice error on failure', async () => {
+  it('rejects with DataError and records slice error on failure', async () => {
     respond({ success: false, message: 'boom', data: null, errors: { x: ['y'] } }, 500);
-    await expect(Widget.all()).rejects.toBeInstanceOf(ApiError);
-    const state = store.getState() as Record<string, { error: { status: number } | null }>;
-    expect(state['widgets']!.error?.status).toBe(500);
+    await expect(Widget.all()).rejects.toBeInstanceOf(DataError);
+    const state = store.getState() as Record<string, { error: { code: string } | null }>;
+    expect(state['widgets']!.error?.code).toBe('http');
   });
 });

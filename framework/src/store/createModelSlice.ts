@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { ApiError } from '../gateway/ApiError.js';
+import type { DataError } from '../errors/DataError.js';
 
 export type ModelStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -9,7 +9,7 @@ export interface ModelSliceState {
   items: PlainEntity[];
   activeId: string | number | null;
   status: ModelStatus;
-  error: ApiError | null;
+  error: DataError | null;
 }
 
 export function createModelSlice(name: string, opts: { idKey: string }) {
@@ -54,7 +54,7 @@ export function createModelSlice(name: string, opts: { idKey: string }) {
       setStatus: (state, action: PayloadAction<ModelStatus>) => {
         state.status = action.payload;
       },
-      setError: (state, action: PayloadAction<ApiError | null>) => {
+      setError: (state, action: PayloadAction<DataError | null>) => {
         state.error = action.payload;
         state.status = action.payload ? 'error' : state.status;
       },

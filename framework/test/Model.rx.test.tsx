@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { waitFor } from '@testing-library/react';
+import { waitFor, cleanup } from '@testing-library/react';
 import { Model } from '../src/model/Model.js';
 import { ModelCollection } from '../src/model/ModelCollection.js';
+import { HttpGateway } from '../src/gateway/HttpGateway.js';
 import { registerModel } from '../src/register.js';
 import { store } from '../src/store/store.js';
 import { configureSublime, resetConfig } from '../src/config/Config.js';
@@ -12,7 +13,7 @@ class Gadget extends Model {
   declare id: number;
   declare label: string;
 }
-registerModel(Gadget as unknown as { name: string; resource?: string });
+registerModel(Gadget as unknown as { name: string; resource?: string }, HttpGateway);
 
 describe('Model rx reads', () => {
   beforeEach(() => {
@@ -25,7 +26,14 @@ describe('Model rx reads', () => {
     });
     store.dispatch({ type: 'gadgets/reset' });
   });
-  afterEach(() => vi.unstubAllGlobals());
+  // Unmount mounted hooks BEFORE unstubbing fetch: globals:false means
+  // @testing-library/react's auto-cleanup afterEach is not installed, so a still-
+  // mounted rxAll() hook could re-run its idle-fetch effect against the real
+  // (unstubbed) fetch during later files' teardown -> ENOTFOUND. cleanup() first.
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
 
   it('rxAll auto-fetches on idle, then serves a reactive hydrated collection', async () => {
     const fetchSpy = vi.fn(async () => ({

@@ -1,15 +1,15 @@
-import type { ApiError } from '../gateway/ApiError.js';
+import type { DataError } from '../errors/DataError.js';
 
 export interface CollectionMeta {
   loading: boolean;
-  error: ApiError | null;
+  error: DataError | null;
   refetch: () => void;
 }
 
 export class ModelCollection<T> implements Iterable<T> {
   readonly items: T[];
   readonly loading: boolean;
-  readonly error: ApiError | null;
+  readonly error: DataError | null;
   readonly refetch: () => void;
 
   constructor(items: T[], meta: Partial<CollectionMeta> = {}) {
