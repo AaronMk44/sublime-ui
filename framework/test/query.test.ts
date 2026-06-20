@@ -34,6 +34,15 @@ describe('isQuery', () => {
     expect(isQuery(legacy)).toBe(false);
   });
 
+  it('returns false for a flat field (status) and true for a structured limit (structural contract)', () => {
+    expect(isQuery({ status: 'active' })).toBe(false);
+    expect(isQuery({ limit: 10 })).toBe(true);
+  });
+
+  it('returns false for a mixed object with one non-Query key (e.g. status + limit)', () => {
+    expect(isQuery({ status: 'active', limit: 10 })).toBe(false);
+  });
+
   it('returns false for null / undefined / non-objects', () => {
     expect(isQuery(null)).toBe(false);
     expect(isQuery(undefined)).toBe(false);
@@ -77,12 +86,26 @@ describe('normalizeQuery', () => {
     expect(normalizeQuery({})).toEqual({});
   });
 
-  it('treats legacy keys named "limit"/"offset" as eq filters, NOT as pagination (documented unsupported)', () => {
-    expect(normalizeQuery({ limit: 10, offset: 5 })).toEqual({
-      filters: [
-        { field: 'limit', op: 'eq', value: 10 },
-        { field: 'offset', op: 'eq', value: 5 },
-      ],
-    });
+  it('passes pagination-only input through unchanged (limit + offset, not eq filters)', () => {
+    expect(normalizeQuery({ limit: 10, offset: 5 })).toEqual({ limit: 10, offset: 5 });
+  });
+
+  it('passes a limit-only Query through unchanged (pagination, not an eq filter)', () => {
+    expect(normalizeQuery({ limit: 10 })).toEqual({ limit: 10 });
+  });
+
+  it('passes a mixed structured Query (filters + limit) through unchanged', () => {
+    const q: Query = {
+      filters: [{ field: 'storeId', op: 'eq', value: 7 }],
+      limit: 10,
+    };
+    expect(normalizeQuery(q)).toEqual(q);
+  });
+
+  it('requires the explicit structured form to filter on a field named "limit" (legacy form unsupported)', () => {
+    // A flat field literally named `limit` cannot be expressed as a legacy record
+    // ({ limit: 10 } is pagination); callers must use the explicit filters form.
+    const q: Query = { filters: [{ field: 'limit', op: 'eq', value: 10 }] };
+    expect(normalizeQuery(q)).toEqual(q);
   });
 });

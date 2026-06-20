@@ -30,9 +30,14 @@ export interface Query {
 
 /**
  * Today's flat form (`{ storeId: 7 }`). Each entry becomes an `eq` filter.
- * NOTE: a legacy key literally named `limit` or `offset` is treated as an `eq`
- * FILTER on that field, NOT as pagination — pagination is only reachable through
- * the structured Query. This is documented as unsupported for the legacy form.
+ *
+ * UNSUPPORTED EDGE: a flat field literally named `filters`, `sort`, `limit`, or
+ * `offset` cannot be expressed in this legacy form — the structural rule (see
+ * `isQuery` / `normalizeQuery`) classifies any object whose keys are all in
+ * { filters, sort, limit, offset } as a structured Query and passes it through,
+ * so `{ limit: 10 }` is pagination, not an `eq` filter on a field called "limit".
+ * To filter on such a field, callers MUST use the explicit structured form, e.g.
+ * `{ filters: [{ field: 'limit', op: 'eq', value: 10 }] }`.
  */
 export type LegacyQuery = Record<string, string | number | boolean>;
 
@@ -53,34 +58,30 @@ export function isQuery(q: unknown): q is Query {
 
 /**
  * Normalize either a structured Query or a legacy flat record into a Query.
- * - undefined -> undefined
- * - a structured Query -> returned as-is
- * - a legacy record -> { filters: [{ field, op: 'eq', value }] } in key order;
- *   an empty record -> {} (the empty Query).
+ * Defers entirely to the STRUCTURAL rule (`isQuery`):
+ * - undefined / null -> undefined
+ * - if EVERY own enumerable key is in { filters, sort, limit, offset } it is a
+ *   structured Query and is returned as-is (preserving filters/sort/limit/offset).
+ *   This includes the empty object {} (the empty Query => all rows) and
+ *   pagination-only inputs like `{ limit: 10 }` / `{ limit: 10, offset: 5 }`.
+ * - otherwise it is a legacy flat record -> { filters: [{ field, op: 'eq', value }] }
+ *   in key order.
  *
- * Disambiguation note: `{ limit }` / `{ offset }` are valid *shapes* for both a
- * structured Query and a legacy record. `isQuery` (a pure structural test) calls
- * them Queries, but for the legacy form the brief specifies they must become `eq`
- * filters (pagination is reachable only via the structured Query). So here we
- * short-circuit as a structured Query only when the unambiguous container keys
- * `filters`/`sort` are present, or when the object is empty (the empty Query).
+ * UNSUPPORTED EDGE (documented on `LegacyQuery`): a flat field literally named
+ * `filters`/`sort`/`limit`/`offset` is NOT reachable via the legacy form — such
+ * an object is classified as a structured Query and passes through. Callers must
+ * use the explicit form, e.g. `{ filters: [{ field: 'limit', op: 'eq', value: 10 }] }`.
  */
 export function normalizeQuery(q?: Query | LegacyQuery): Query | undefined {
-  if (q === undefined) return undefined;
-  if (isQuery(q)) {
-    const keys = Object.keys(q);
-    // Empty object, or carries an unambiguous container key -> already a Query.
-    if (keys.length === 0 || keys.includes('filters') || keys.includes('sort')) {
-      return q;
-    }
-    // Otherwise the only keys are `limit`/`offset` with scalar values, which is
-    // an ambiguous shape; the legacy form requires they become `eq` filters.
-  }
+  if (q === undefined || q === null) return undefined;
+  // Structural passthrough: empty {} and any object whose keys are all structured
+  // Query keys (filters/sort/limit/offset) are returned unchanged.
+  if (isQuery(q)) return q;
   const legacy = q as LegacyQuery;
   const filters: QueryFilter[] = Object.entries(legacy).map(([field, value]) => ({
     field,
     op: 'eq' as const,
     value,
   }));
-  return filters.length > 0 ? { filters } : {};
+  return { filters };
 }
