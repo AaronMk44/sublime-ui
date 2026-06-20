@@ -21,7 +21,8 @@
     "devkit",
     "ui",
     "desktop",
-    "create-app"
+    "create-app",
+    "storage"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

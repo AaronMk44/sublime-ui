@@ -1,0 +1,89 @@
+{
+  "name": "@sublime-ui/storage",
+  "version": "0.1.2",
+  "description": "Platform-resolved DatabaseAdapter implementations (SQLite desktop/mobile, IndexedDB web) and createDatabaseAdapter() for Sublime UI.",
+  "keywords": [
+    "sublime-ui",
+    "storage",
+    "sqlite",
+    "indexeddb",
+    "better-sqlite3",
+    "expo-sqlite",
+    "idb",
+    "cross-platform",
+    "typescript"
+  ],
+  "homepage": "https://sublime-ui.github.io/sublime-ui/",
+  "bugs": "https://github.com/sublime-ui/sublime-ui/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sublime-ui/sublime-ui.git",
+    "directory": "storage"
+  },
+  "license": "MIT",
+  "author": "Aaron Mkandawire",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "import": "./dist/web.js"
+    },
+    "./desktop": {
+      "types": "./dist/desktop.d.ts",
+      "import": "./dist/desktop.js"
+    },
+    "./mobile": {
+      "types": "./dist/mobile.d.ts",
+      "import": "./dist/mobile.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@sublime-ui/framework": "^0.1.3"
+  },
+  "peerDependencies": {
+    "better-sqlite3": ">=11",
+    "expo-sqlite": ">=14",
+    "idb": ">=8",
+    "@sublime-ui/desktop": ">=0.1.2"
+  },
+  "peerDependenciesMeta": {
+    "better-sqlite3": {
+      "optional": true
+    },
+    "expo-sqlite": {
+      "optional": true
+    },
+    "idb": {
+      "optional": true
+    },
+    "@sublime-ui/desktop": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@sublime-ui/desktop": "^0.1.3",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22",
+    "better-sqlite3": "^11.5.0",
+    "fake-indexeddb": "^6.0.0",
+    "idb": "^8.0.0"
+  }
+}
