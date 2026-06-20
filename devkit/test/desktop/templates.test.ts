@@ -43,6 +43,10 @@ describe('desktop templates', () => {
     it('builds the main entry', () => {
       expect(out).toContain("entry: './src/main/main.ts'");
     });
+
+    it('maps .js specifiers to .ts/.tsx so generated imports resolve', () => {
+      expect(out).toContain('extensionAlias');
+    });
   });
 
   describe('renderWebpackRenderer', () => {
@@ -52,6 +56,11 @@ describe('desktop templates', () => {
       expect(out).toContain("name: 'main_window'");
       expect(out).toContain("preload:");
       expect(out).toContain('./src/main/preload.ts');
+    });
+
+    it('maps .js specifiers to .ts/.tsx so the generated nav barrel resolves', () => {
+      // The generated `./navigation.js` import only resolves with this alias.
+      expect(out).toContain('extensionAlias');
     });
   });
 
