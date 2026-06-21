@@ -1,5 +1,13 @@
 # @sublime-ui/create-app
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [a17ff80]
+- Updated dependencies [0b9ec46]
+  - @sublime-ui/devkit@2.0.0
+
 ## 1.0.0
 
 ### Patch Changes

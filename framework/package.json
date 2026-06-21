@@ -1,6 +1,6 @@
 {
   "name": "@sublime-ui/framework",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Laravel/Eloquent-style models, typed state, and a reactive data layer for cross-platform TypeScript apps.",
   "keywords": [
     "sublime-ui",

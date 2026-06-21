@@ -43,7 +43,7 @@ describe('id round-trip — ids survive find/save/delete across backends (spec #
   });
 
   it('numeric-keyed HTTP model preserves a number id through save/find/delete', async () => {
-    vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
+    vi.stubGlobal('fetch', async (_url: string, init?: RequestInit) => {
       const method = init?.method ?? 'GET';
       if (method === 'POST') {
         return { ok: true, status: 201, json: async () => ({ success: true, message: '', data: { id: 42, email: 'a@b.c' }, errors: null }) } as Response;

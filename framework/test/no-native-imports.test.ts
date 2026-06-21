@@ -49,7 +49,7 @@ describe('core purity — framework/src has no native/RN/DOM-engine imports', ()
       const specs = importsOf(readFileSync(file, 'utf8'));
       for (const spec of specs) {
         const base = spec.split('/')[0];
-        if (FORBIDDEN.includes(base)) {
+        if (base !== undefined && FORBIDDEN.includes(base)) {
           violations.push(`${relative(SRC, file)} imports "${spec}"`);
         }
       }

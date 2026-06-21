@@ -1,6 +1,6 @@
 {
   "name": "@sublime-ui/storage",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Platform-resolved DatabaseAdapter implementations (SQLite desktop/mobile, IndexedDB web) and createDatabaseAdapter() for Sublime UI.",
   "keywords": [
     "sublime-ui",
@@ -56,13 +56,13 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@sublime-ui/framework": "^1.0.0"
+    "@sublime-ui/framework": "^2.0.0"
   },
   "peerDependencies": {
     "better-sqlite3": ">=11",
     "expo-sqlite": ">=14",
     "idb": ">=8",
-    "@sublime-ui/desktop": ">=1.0.0"
+    "@sublime-ui/desktop": ">=2.0.0"
   },
   "peerDependenciesMeta": {
     "better-sqlite3": {
@@ -79,7 +79,7 @@
     }
   },
   "devDependencies": {
-    "@sublime-ui/desktop": "^1.0.0",
+    "@sublime-ui/desktop": "^2.0.0",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22",
     "better-sqlite3": "^11.5.0",
