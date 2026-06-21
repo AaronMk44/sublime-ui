@@ -1,23 +1,60 @@
-import { ensurePortableJdk17 } from '../lib/jdk.js';
-import { resolveAndroidHome } from '../lib/probe.js';
+import { ensureManagedJdk17 } from '../lib/jdk.js';
+import { ensureManagedSdk, managedSdkDir } from '../lib/android-sdk.js';
+import { acceptLicenses as acceptLicensesDefault } from '../lib/sdkmanager.js';
+import { ensureComponents } from '../lib/sdkmanager.js';
+import { gatherProbes } from '../lib/probe.js';
+import { buildDoctorReport, type DoctorReport } from '../lib/doctor-report.js';
+import { REQUIREMENTS } from '../lib/requirements.js';
 import { log } from '../util/log.js';
 
-export async function setupCommand(): Promise<number> {
-  if (process.platform !== 'win32') {
-    log.info('Guided setup (macOS/Linux):');
-    log.info('  1. Install Temurin JDK 17 and set JAVA_HOME.');
-    log.info('  2. Install Android cmdline-tools; set ANDROID_HOME.');
-    log.info('  3. sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"');
-    log.info('  4. Re-run: sublime doctor');
+/** The full pinned toolchain `setup` installs in one shot. */
+export const SETUP_COMPONENTS: string[] = [
+  'platform-tools',
+  `platforms;${REQUIREMENTS.platform}`,
+  `build-tools;${REQUIREMENTS.buildTools}`,
+  `ndk;${REQUIREMENTS.ndk}`,
+  `cmake;${REQUIREMENTS.cmake}`,
+];
+
+export interface SetupDeps {
+  ensureJdk: () => Promise<string>;
+  ensureSdk: () => Promise<string>;
+  acceptLicenses: (sdkRoot: string, jdkHome: string) => Promise<number>;
+  installComponents: (sdkRoot: string, ids: string[], jdkHome: string) => Promise<void>;
+  report: () => Promise<DoctorReport> | DoctorReport;
+}
+
+const defaultDeps: SetupDeps = {
+  ensureJdk: () => ensureManagedJdk17(),
+  ensureSdk: () => ensureManagedSdk(),
+  acceptLicenses: acceptLicensesDefault,
+  installComponents: ensureComponents,
+  report: async () => buildDoctorReport(await gatherProbes()),
+};
+
+export async function setupCommand(deps: SetupDeps = defaultDeps): Promise<number> {
+  log.banner('Sublime · Android build setup');
+  const TOTAL = 5;
+
+  log.phase(1, TOTAL, 'JDK 17 (Temurin)');
+  const jdkHome = await deps.ensureJdk();
+
+  log.phase(2, TOTAL, 'Android cmdline-tools');
+  const sdkRoot = await deps.ensureSdk();
+
+  log.phase(3, TOTAL, 'Accept SDK licenses');
+  await deps.acceptLicenses(sdkRoot, jdkHome);
+
+  log.phase(4, TOTAL, 'SDK packages');
+  await deps.installComponents(sdkRoot, SETUP_COMPONENTS, jdkHome);
+
+  log.phase(5, TOTAL, 'Verify');
+  const report = await deps.report();
+  log.table(report.rows);
+  if (report.ok) {
+    log.success(`Done — toolchain ready at ${managedSdkDir()}. Run: sublime build`);
     return 0;
   }
-  log.step('Setting up Windows build environment…');
-  const jdk = await ensurePortableJdk17();
-  log.success(`Portable JDK 17 ready at ${jdk}`);
-  if (resolveAndroidHome(process.env) === null) {
-    log.warn('ANDROID_HOME is not set. Install Android SDK cmdline-tools and set ANDROID_HOME, then re-run: sublime doctor');
-    return 1;
-  }
-  log.success('Setup complete. Run: sublime doctor');
-  return 0;
+  log.warn('Setup finished but some checks did not pass — re-run: sublime setup');
+  return 1;
 }
