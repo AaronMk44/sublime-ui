@@ -25,6 +25,19 @@ export function resolveAndroidSdk(
   return { path: null, source: null };
 }
 
+/** The adb binary inside an SDK's platform-tools. */
+export function adbPath(androidHome: string): string {
+  const bin = process.platform === 'win32' ? 'adb.exe' : 'adb';
+  return join(androidHome, 'platform-tools', bin);
+}
+
+/** Resolves the adb to invoke: the managed/SDK platform-tools adb if present, else PATH `adb`. */
+export function resolveAdb(env: NodeJS.ProcessEnv): string {
+  const { path: sdk } = resolveAndroidSdk(env);
+  if (sdk !== null && existsSync(adbPath(sdk))) return adbPath(sdk);
+  return 'adb';
+}
+
 export function sdkmanagerPath(androidHome: string): string {
   const bin = process.platform === 'win32' ? 'sdkmanager.bat' : 'sdkmanager';
   return join(androidHome, 'cmdline-tools', 'latest', 'bin', bin);
@@ -75,7 +88,13 @@ export async function gatherProbes(): Promise<Probes> {
     }
   }
 
+  // platform-tools is present if the resolved (managed or env) SDK has adb on
+  // disk OR a PATH `adb` works. The on-disk check fixes managed installs where
+  // adb is at <sdk>/platform-tools/adb but is not on PATH.
   const adbRes = await run('adb', ['--version']);
+  const platformTools =
+    (androidHome !== null && existsSync(adbPath(androidHome))) ||
+    parseAdbVersion(adbRes.stdout) !== null;
 
   return {
     node: nodeRes.stdout.trim() || null,
@@ -84,7 +103,7 @@ export async function gatherProbes(): Promise<Probes> {
     androidHome,
     ...(androidHomeSource ? { androidHomeSource } : {}),
     sdkmanager,
-    platformTools: parseAdbVersion(adbRes.stdout) !== null,
+    platformTools,
     ndk,
     cmake,
   };

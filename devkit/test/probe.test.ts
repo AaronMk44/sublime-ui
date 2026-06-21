@@ -15,6 +15,8 @@ import {
   sdkmanagerPath,
   legacySdkmanagerPath,
   gatherProbes,
+  adbPath,
+  resolveAdb,
 } from '../src/lib/probe.js';
 import { managedSdkDir } from '../src/lib/android-sdk.js';
 
@@ -128,5 +130,48 @@ describe('gatherProbes (filesystem detection)', () => {
     expect(probes.sdkmanager).toBe(false);
     expect(probes.ndk).toBeNull();
     expect(probes.cmake).toBeNull();
+  });
+
+  it('reports platformTools true for a managed SDK with on-disk adb but no PATH adb', async () => {
+    // Managed install: env unset, but managed cmdline-tools + managed adb exist
+    // on disk. PATH `adb --version` returns nothing (adb not on PATH). The probe
+    // must still report platform-tools as present from the SDK on disk.
+    process.env = { ...ORIGINAL_ENV, ANDROID_HOME: undefined, ANDROID_SDK_ROOT: undefined } as NodeJS.ProcessEnv;
+    const managedSm = sdkmanagerPath(managedSdkDir());
+    const managedAdb = adbPath(managedSdkDir());
+    existsSyncMock.mockImplementation((p: string) => p === managedSm || p === managedAdb);
+    runMock.mockImplementation((file: string) => {
+      if (file === process.execPath) return Promise.resolve({ stdout: 'v20.0.0', stderr: '', exitCode: 0 });
+      if (file === 'java') return Promise.resolve({ stdout: '', stderr: 'openjdk version "17.0.13"', exitCode: 0 });
+      // adb is NOT on PATH: empty/non-version output, non-zero exit.
+      return Promise.resolve({ stdout: '', stderr: '', exitCode: 1 });
+    });
+    const probes = await gatherProbes();
+    expect(probes.androidHome).toBe(managedSdkDir());
+    expect(probes.androidHomeSource).toBe('managed');
+    expect(probes.platformTools).toBe(true);
+  });
+});
+
+describe('adbPath', () => {
+  it('joins platform-tools and the platform adb binary', () => {
+    const p = adbPath('/sdk');
+    expect(p).toContain(join('platform-tools'));
+    expect(p).toContain(process.platform === 'win32' ? 'adb.exe' : 'adb');
+  });
+});
+
+describe('resolveAdb', () => {
+  it('returns the managed adb path when it exists on disk', () => {
+    const managedSm = sdkmanagerPath(managedSdkDir());
+    const managedAdb = adbPath(managedSdkDir());
+    existsSyncMock.mockReset();
+    existsSyncMock.mockImplementation((p: string) => p === managedSm || p === managedAdb);
+    expect(resolveAdb({})).toBe(managedAdb);
+  });
+  it('falls back to PATH adb when no SDK adb exists', () => {
+    existsSyncMock.mockReset();
+    existsSyncMock.mockReturnValue(false);
+    expect(resolveAdb({})).toBe('adb');
   });
 });

@@ -1,4 +1,5 @@
 import { run } from '../util/exec.js';
+import { resolveAdb } from './probe.js';
 
 export function parseAdbDevices(stdout: string): string[] {
   const serials: string[] = [];
@@ -12,19 +13,19 @@ export function parseAdbDevices(stdout: string): string[] {
 }
 
 export async function listDevices(): Promise<string[]> {
-  const res = await run('adb', ['devices']);
+  const res = await run(resolveAdb(process.env), ['devices']);
   return parseAdbDevices(res.stdout);
 }
 
 export async function installApk(serial: string, apkPath: string): Promise<void> {
-  const res = await run('adb', ['-s', serial, 'install', '-r', apkPath]);
+  const res = await run(resolveAdb(process.env), ['-s', serial, 'install', '-r', apkPath]);
   if (res.exitCode !== 0) {
     throw new Error(`adb install failed:\n${res.stderr || res.stdout}`);
   }
 }
 
 export async function launchActivity(serial: string, pkg: string): Promise<void> {
-  const res = await run('adb', [
+  const res = await run(resolveAdb(process.env), [
     '-s', serial, 'shell', 'monkey', '-p', pkg,
     '-c', 'android.intent.category.LAUNCHER', '1',
   ]);

@@ -80,7 +80,8 @@ export async function ensureComponents(
     });
     if (res.exitCode !== 0) {
       // First attempt can fail on unaccepted licenses; accept them then retry once.
-      await run(smPath, [`--sdk_root=${androidHome}`, '--licenses'], { env });
+      // Feed acceptances so `--licenses` can't block waiting on stdin.
+      await run(smPath, [`--sdk_root=${androidHome}`, '--licenses'], { env, input: 'y\n'.repeat(50) });
       const retry = await run(
         smPath,
         [`--sdk_root=${androidHome}`, id, '--channel=0'],
