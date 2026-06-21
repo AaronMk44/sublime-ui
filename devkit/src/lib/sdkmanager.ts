@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { sdkmanagerPath } from './probe.js';
-import { run } from '../util/exec.js';
+import { run, type RunResult, type RunOptions } from '../util/exec.js';
 import { log } from '../util/log.js';
 
 /** A complete NDK has source.properties, an ndk-build script, and clang. */
@@ -24,6 +24,30 @@ export function isValidNdk(ndkDir: string): boolean {
     }
   }
   return false;
+}
+
+export type Runner = (
+  file: string,
+  args: string[],
+  opts: RunOptions,
+) => Promise<RunResult>;
+
+/**
+ * Accepts all Android SDK licenses non-interactively by piping "y" lines into
+ * `sdkmanager --licenses`, scoped to the managed JDK and SDK root. Returns the
+ * sdkmanager exit code.
+ */
+export async function acceptLicenses(
+  sdkRoot: string,
+  jdkHome: string,
+  runner: Runner = run,
+): Promise<number> {
+  const smPath = sdkmanagerPath(sdkRoot);
+  const env = { JAVA_HOME: jdkHome, ANDROID_HOME: sdkRoot };
+  // sdkmanager prompts y/N for each license; feed plenty of acceptances.
+  const input = 'y\n'.repeat(50);
+  const res = await runner(smPath, [`--sdk_root=${sdkRoot}`, '--licenses'], { env, input });
+  return res.exitCode;
 }
 
 function ndkDirFor(androidHome: string, id: string): string | null {

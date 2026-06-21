@@ -9,6 +9,7 @@ export interface RunResult {
 export interface RunOptions {
   cwd?: string;
   env?: Record<string, string>;
+  input?: string;
 }
 
 /** Runs a process, capturing output. Never throws on non-zero exit. */
@@ -20,6 +21,7 @@ export async function run(
   const result = await execa(file, args, {
     ...(opts.cwd === undefined ? {} : { cwd: opts.cwd }),
     env: { ...process.env, ...opts.env },
+    ...(opts.input === undefined ? {} : { input: opts.input }),
     reject: false,
     all: false,
   });
