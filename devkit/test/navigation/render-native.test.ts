@@ -30,11 +30,58 @@ describe('renderNative', () => {
     expect(out).toContain('useNativeNav');
   });
 
-  it('imports NavProvider from the navigation subpath barrel', () => {
+  it('imports NavHeader + NavProvider from the navigation subpath barrel', () => {
     const out = renderNative(tree as any, { screensImport: './screens' });
-    expect(out).toContain("import { NavProvider } from '@sublime-ui/ui/navigation';");
-    // NavProvider is NOT exported from the root entry.
+    expect(out).toContain("import { NavHeader, NavProvider } from '@sublime-ui/ui/navigation';");
+    // The nav APIs are NOT exported from the root entry.
     expect(out).not.toContain("from '@sublime-ui/ui';");
+  });
+
+  it('renders the Sublime AppBar (NavHeader) as the default navigator header', () => {
+    const out = renderNative(tree as any, { screensImport: './screens' });
+    expect(out).toContain('screenOptions={{ header: (props) => <NavHeader {...props} /> }}');
+  });
+
+  it('wraps leaf page components in withNav (per-screen nav facade)', () => {
+    const out = renderNative(tree as any, { screensImport: './screens' });
+    expect(out).toContain('function withNav<P extends object>');
+    expect(out).toContain('component={withNav(Home)}');
+    // Nested navigators are mounted directly, not wrapped.
+    expect(out).toContain('component={SettingsNavigator}');
+  });
+
+  it('mounts the root navigator directly under NavigationContainer (no container-level NavBridge)', () => {
+    const out = renderNative(tree as any, { screensImport: './screens' });
+    expect(out).toContain('<NavigationContainer>\n      <RootNavigator />\n    </NavigationContainer>');
+    expect(out).not.toContain('<NavBridge>');
+  });
+
+  it('hides the host header for a nested navigator screen (no stacked AppBars)', () => {
+    const out = renderNative(tree as any, { screensImport: './screens' });
+    expect(out).toContain('<Tab.Screen name="settings" component={SettingsNavigator} options={{ headerShown: false }} />');
+  });
+
+  it('emits headerShown:false for a page that opts out with header:false', () => {
+    const noHeaderTree = {
+      key: 'root', kind: 'book', format: 'stack', options: {},
+      children: [
+        { key: 'home', kind: 'page', component: 'Home', options: { title: 'Home', header: false } },
+      ],
+    } as const;
+    const out = renderNative(noHeaderTree as any, { screensImport: './screens' });
+    expect(out).toContain('options={{ title: "Home", headerShown: false }}');
+  });
+
+  it('disables the header for a whole book with book-level header:false', () => {
+    const bookOff = {
+      key: 'root', kind: 'book', format: 'stack', options: { header: false },
+      children: [{ key: 'home', kind: 'page', component: 'Home', options: {} }],
+    } as const;
+    const out = renderNative(bookOff as any, { screensImport: './screens' });
+    expect(out).toContain('screenOptions={{ headerShown: false }}');
+    // NavHeader is unused, so it is not imported.
+    expect(out).toContain("import { NavProvider } from '@sublime-ui/ui/navigation';");
+    expect(out).not.toContain('NavHeader');
   });
 
   it('imports useNativeNav directly from the platform bridge module', () => {
@@ -46,7 +93,7 @@ describe('renderNative', () => {
 
   it('imports ReactNode explicitly instead of referencing the global React namespace', () => {
     const out = renderNative(tree as any, { screensImport: './screens' });
-    expect(out).toContain("import type { ReactNode } from 'react';");
+    expect(out).toContain("import type { ComponentType, ReactNode } from 'react';");
     expect(out).not.toContain('React.ReactNode');
   });
 

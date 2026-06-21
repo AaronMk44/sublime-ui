@@ -29,7 +29,7 @@ type UnionToIntersection<U> =
 /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type */
 
 export function book<F extends PrintFormat, Pages extends Record<string, Entry>>(
-  def: { format: F; pages: Pages },
+  def: { format: F; pages: Pages; header?: boolean },
 ): BookDef<F, RoutesOf<Pages> & RouteMap> {
   return { kind: 'book', format: def.format, pages: def.pages };
 }

@@ -56,6 +56,7 @@
   },
   "peerDependencies": {
     "react": ">=18",
+    "@sublime-ui/library": ">=1.0.0",
     "react-native": ">=0.74",
     "@react-navigation/native": ">=6",
     "@react-navigation/native-stack": ">=6",
@@ -65,6 +66,9 @@
     "react-router-dom": ">=6"
   },
   "peerDependenciesMeta": {
+    "@sublime-ui/library": {
+      "optional": true
+    },
     "react-native": {
       "optional": true
     },
@@ -88,6 +92,7 @@
     }
   },
   "devDependencies": {
+    "@sublime-ui/library": "^1.0.0",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/bottom-tabs": "^6.6.1",

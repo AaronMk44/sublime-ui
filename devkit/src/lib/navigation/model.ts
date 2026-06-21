@@ -7,6 +7,8 @@ export interface PageOptions {
   icon?: string;
   path?: string; // web URL segment; defaults to kebab-cased key
   initial?: boolean;
+  /** Mobile header: omitted renders the Sublime AppBar; `false` hides it. */
+  header?: boolean;
 }
 
 /**

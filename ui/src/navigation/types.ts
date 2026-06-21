@@ -7,6 +7,13 @@ export interface PageOptions {
   icon?: string;
   path?: string;       // web URL segment; defaults to kebab-cased key
   initial?: boolean;
+  /**
+   * Mobile header control. Omitted (default) renders the shipped Sublime
+   * `AppBar` as the screen header. `false` hides it (`headerShown: false`) so
+   * the screen can render its own bar in-content. Set on a `book(...)` to apply
+   * as the default for all its pages; a per-page value wins.
+   */
+  header?: boolean;
 }
 
 export interface PageDef<P = void> {

@@ -18,19 +18,40 @@ const FACTORY_MODULE: Record<string, string> = {
   createNativeStackNavigator: '@react-navigation/native-stack',
 };
 
+/** The shipped Sublime AppBar header, wired to React Navigation's header slot. */
+const HEADER_RENDER = '(props) => <NavHeader {...props} />';
+
 function factoryFor(format: PrintFormat | undefined): { factory: string; nav: string } {
   return NATIVE_FACTORY[format ?? 'stack'] ?? NATIVE_FACTORY.stack!;
 }
 
+/** Result of building a screen's `options={{ ... }}` body. */
+interface ScreenOptions {
+  /** The comma-joined options body (`''` when there is nothing to emit). */
+  body: string;
+  /** True when the body references `<NavHeader>` (so the file must import it). */
+  usesHeader: boolean;
+}
+
 /**
- * Build the inner body of a `<Nav.Screen options={{ ... }} />` from a node's
- * `PageOptions`. Emits `title` (header/tab label) on every navigator and
- * `tabBarIcon` only where the navigator surfaces an icon (tab/drawer). Returns
- * `''` when there is nothing to emit (caller then omits the `options` attr).
+ * Build the inner body of a `<Nav.Screen options={{ ... }} />` for one child.
+ *
+ * Emits `title` (header/tab label) on every navigator and `tabBarIcon` only
+ * where the navigator surfaces an icon (tab/drawer). Header rules:
+ *  - a nested navigator host (`isBook`) gets `headerShown: false` so only the
+ *    inner navigator's AppBar shows (no stacked headers);
+ *  - a page hides the AppBar with `header: false` when its navigator shows one;
+ *  - a page re-enables the AppBar with `header: true` when its navigator does not.
  */
-function screenOptions(node: RouteNode, supportsIcon: boolean): string {
+function screenOptions(
+  node: RouteNode,
+  supportsIcon: boolean,
+  bookShowsHeader: boolean,
+  isBook: boolean,
+): ScreenOptions {
   const parts: string[] = [];
-  const { title, icon } = node.options;
+  let usesHeader = false;
+  const { title, icon, header } = node.options;
   if (title !== undefined) parts.push(`title: ${JSON.stringify(title)}`);
   if (icon !== undefined && supportsIcon) {
     // React Navigation's tabBarIcon/drawerIcon is a render function returning a
@@ -38,7 +59,15 @@ function screenOptions(node: RouteNode, supportsIcon: boolean): string {
     // name stays live, typed data (not a dead comment) the app can theme.
     parts.push(`tabBarIcon: () => <NavIcon name={${JSON.stringify(icon)}} />`);
   }
-  return parts.join(', ');
+  if (isBook) {
+    parts.push('headerShown: false');
+  } else if (bookShowsHeader && header === false) {
+    parts.push('headerShown: false');
+  } else if (!bookShowsHeader && header === true) {
+    parts.push(`header: ${HEADER_RENDER}`);
+    usesHeader = true;
+  }
+  return { body: parts.join(', '), usesHeader };
 }
 
 /** PascalCase a route key into a generated navigator component name. */
@@ -56,15 +85,21 @@ function pascal(key: string): string {
  * Emit a `navigation.native.tsx` source string from a storybook `RouteNode`
  * tree. Each `book` becomes a React Navigation navigator (factory chosen by
  * `format`); each `page` becomes a `<Nav.Screen>`. Nested linked books recurse
- * into their own generated navigator components. The exported `Navigation`
- * component wraps everything in `NavigationContainer` and bridges the runtime
- * `useNativeNav()` through `<NavProvider>`.
+ * into their own generated navigator components.
+ *
+ * Every navigator renders the shipped Sublime `AppBar` (`NavHeader`) as its
+ * header by default — replacing React Navigation's default header — unless its
+ * book sets `header: false`. Leaf page components are wrapped in `withNav` so
+ * the runtime `useNativeNav()` facade resolves inside a screen (where
+ * `useRoute()` is valid); the exported `Navigation` mounts the root navigator
+ * directly under `NavigationContainer`.
  */
 export function renderNative(root: RouteNode, opts: RenderNativeOptions): string {
   const screenNames = new Set<string>();
   const navigatorBlocks: string[] = [];
   const usedFactories = new Map<string, string>(); // factory → navigator var name
   let usesIcon = false;
+  let usesNavHeader = false;
 
   /** Build (or reuse) a navigator local var for a factory and register its import. */
   const navVarFor = (factory: string, nav: string): string => {
@@ -74,8 +109,8 @@ export function renderNative(root: RouteNode, opts: RenderNativeOptions): string
 
   /**
    * Render a book node into a named navigator component, returning that
-   * component's name. Page children become `<Nav.Screen>`; book children
-   * recurse and are mounted as a `<Nav.Screen component={ChildNavigator}>`.
+   * component's name. Page children become `<Nav.Screen>` (wrapped in
+   * `withNav`); book children recurse and mount as `<Nav.Screen component={ChildNavigator}>`.
    */
   const renderBook = (book: RouteNode): string => {
     const { factory, nav } = factoryFor(book.format);
@@ -83,25 +118,34 @@ export function renderNative(root: RouteNode, opts: RenderNativeOptions): string
     const componentName = book.key === 'root' ? 'RootNavigator' : `${pascal(book.key)}Navigator`;
     // Only tab/drawer navigators surface a per-screen icon.
     const supportsIcon = factory === 'createBottomTabNavigator' || factory === 'createDrawerNavigator';
+    // A book renders the Sublime AppBar by default; `header: false` opts out.
+    const bookShowsHeader = book.options.header !== false;
+    if (bookShowsHeader) usesNavHeader = true;
 
     const children = book.children ?? [];
 
     const screens: string[] = [];
     for (const child of children) {
-      const name = child.kind === 'page' ? (child.component ?? pascal(child.key)) : renderBook(child);
-      if (child.kind === 'page') screenNames.add(name);
+      const isBook = child.kind === 'book';
+      const name = isBook ? renderBook(child) : (child.component ?? pascal(child.key));
+      // Leaf pages are wrapped so the nav facade resolves inside a screen.
+      const componentExpr = isBook ? name : `withNav(${name})`;
+      if (!isBook) screenNames.add(name);
 
       if (supportsIcon && child.options.icon !== undefined) usesIcon = true;
-      const options = screenOptions(child, supportsIcon);
-      const optionsAttr = options ? ` options={{ ${options} }}` : '';
+      const { body, usesHeader } = screenOptions(child, supportsIcon, bookShowsHeader, isBook);
+      if (usesHeader) usesNavHeader = true;
+      const optionsAttr = body ? ` options={{ ${body} }}` : '';
       screens.push(
-        `      <${navVar}.Screen name="${child.key}" component={${name}}${optionsAttr} />`,
+        `      <${navVar}.Screen name="${child.key}" component={${componentExpr}}${optionsAttr} />`,
       );
     }
 
     // `initial: true` selects the navigator's starting route (defaults to first).
     const initialChild = children.find((c) => c.options.initial === true);
-    const navProps = initialChild ? ` initialRouteName="${initialChild.key}"` : '';
+    const initialAttr = initialChild ? ` initialRouteName="${initialChild.key}"` : '';
+    const screenOptsObj = bookShowsHeader ? `header: ${HEADER_RENDER}` : 'headerShown: false';
+    const navProps = `${initialAttr} screenOptions={{ ${screenOptsObj} }}`;
 
     navigatorBlocks.push(
       `function ${componentName}() {\n` +
@@ -137,29 +181,37 @@ export function renderNative(root: RouteNode, opts: RenderNativeOptions): string
       `}\n\n`
     : '';
 
+  // The Sublime AppBar header (NavHeader) and the nav facade (NavProvider) both
+  // come from the navigation subpath barrel; import NavHeader only when used.
+  const navUiNames = usesNavHeader ? 'NavHeader, NavProvider' : 'NavProvider';
+
   return (
     `${header}\n` +
-    `import type { ReactNode } from 'react';\n` +
+    `import type { ComponentType, ReactNode } from 'react';\n` +
     `import { NavigationContainer } from '@react-navigation/native';\n` +
     `${factoryImports}\n` +
-    `import { NavProvider } from '@sublime-ui/ui/navigation';\n` +
+    `import { ${navUiNames} } from '@sublime-ui/ui/navigation';\n` +
     `import { useNativeNav } from '@sublime-ui/ui/navigation/bridge.native';\n` +
     `import { ${screenImport} } from '${opts.screensImport}';\n` +
     `\n` +
     `${navIconBlock}` +
     `${navigatorBlocks.join('\n\n')}\n` +
     `\n` +
-    `function NavBridge({ children }: { children: ReactNode }) {\n` +
-    `  const nav = useNativeNav();\n` +
-    `  return <NavProvider value={nav}>{children}</NavProvider>;\n` +
+    `function withNav<P extends object>(Component: ComponentType<P>): ComponentType<P> {\n` +
+    `  return function NavBridge(props: P): ReactNode {\n` +
+    `    const nav = useNativeNav();\n` +
+    `    return (\n` +
+    `      <NavProvider value={nav}>\n` +
+    `        <Component {...props} />\n` +
+    `      </NavProvider>\n` +
+    `    );\n` +
+    `  };\n` +
     `}\n` +
     `\n` +
     `export function Navigation() {\n` +
     `  return (\n` +
     `    <NavigationContainer>\n` +
-    `      <NavBridge>\n` +
-    `        <${rootComponent} />\n` +
-    `      </NavBridge>\n` +
+    `      <${rootComponent} />\n` +
     `    </NavigationContainer>\n` +
     `  );\n` +
     `}\n`

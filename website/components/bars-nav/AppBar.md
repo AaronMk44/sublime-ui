@@ -9,6 +9,13 @@ A top navigation bar for a screen — it shows the current title, an optional su
 
 Renders on web via MUI and on mobile via React Native Paper from a single import.
 
+On mobile this is also the **default navigation header**: `sublime build:nav`
+wires it into every generated navigator automatically (title from the page's
+`title`, back arrow shown only when there's somewhere to go back). You rarely
+construct it by hand for navigation — see
+[Storybook Navigation → Mobile header](/docs/navigation/storybook#mobile-header-appbar).
+Use it directly when you need a standalone bar or a custom header (`header: false`).
+
 ## Usage
 
 ```tsx

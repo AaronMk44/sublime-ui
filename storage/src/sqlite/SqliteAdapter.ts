@@ -18,6 +18,13 @@ const ID_KEY = 'id';
  * go through `buildSelect` (json_extract). On first use it runs a JSON1
  * capability probe and throws StorageError if absent. Table names are validated
  * via `ident`; field paths/values are bound (no injection).
+ *
+ * Every op self-heals by calling the idempotent `ensureCollection` first (cheap
+ * after the first call — a `created` Set lookup). `DbGateway`'s read path never
+ * calls `ensureCollection`, and `registerModel` only fires it as an un-awaited
+ * `void`, so the first `rxAll()` read would otherwise race the `CREATE TABLE`
+ * ("no such table"). The IndexedDB adapter gets this for free via collect-then-
+ * open; here the adapter guarantees the table exists at every entry point.
  */
 export class SqliteAdapter implements DatabaseAdapter {
   private readonly created = new Set<string>();
@@ -36,24 +43,28 @@ export class SqliteAdapter implements DatabaseAdapter {
   }
 
   async get(resource: string, id: Id): Promise<Row | null> {
+    await this.ensureCollection(resource);
     const table = ident(resource);
     const row = await this.driver.get(`SELECT doc FROM ${table} WHERE id = ?`, [String(id)]);
     return row ? (JSON.parse(row.doc) as Row) : null;
   }
 
   async getAll(resource: string): Promise<Row[]> {
+    await this.ensureCollection(resource);
     const table = ident(resource);
     const rows = await this.driver.all(`SELECT doc FROM ${table}`, []);
     return rows.map((r) => JSON.parse(r.doc) as Row);
   }
 
   async query(resource: string, query: Query): Promise<Row[]> {
+    await this.ensureCollection(resource);
     const { sql, params } = buildSelect(resource, query);
     const rows = await this.driver.all(sql, params);
     return rows.map((r) => JSON.parse(r.doc) as Row);
   }
 
   async insert(resource: string, row: Row): Promise<Row> {
+    await this.ensureCollection(resource);
     const table = ident(resource);
     const id = String(row[ID_KEY]);
     try {
@@ -87,6 +98,7 @@ export class SqliteAdapter implements DatabaseAdapter {
   }
 
   async delete(resource: string, id: Id): Promise<void> {
+    await this.ensureCollection(resource);
     const table = ident(resource);
     // No-op when the row is absent (changes === 0 is fine).
     await this.driver.run(`DELETE FROM ${table} WHERE id = ?`, [String(id)]);

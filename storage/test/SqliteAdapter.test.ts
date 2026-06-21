@@ -209,6 +209,36 @@ describe('SqliteAdapter — slash-prefixed resource', () => {
   });
 });
 
+describe('SqliteAdapter — self-creates table on first op (no explicit ensureCollection)', () => {
+  // Regression: DbGateway never calls ensureCollection on its read path, and
+  // registerModel only fires it as a fire-and-forget `void`. On the IndexedDB
+  // adapter the store is created when the DB opens (collect-then-open), so a
+  // first read never races. On SQLite the un-awaited CREATE TABLE raced the
+  // first `rxAll()` read → "no such table: todos" on mobile. Each op must
+  // self-heal by ensuring the table first (idempotent via the `created` Set).
+  it('getAll on a never-ensured resource returns [] instead of throwing', async () => {
+    expect(await adapter.getAll('todos')).toEqual([]);
+  });
+
+  it('query on a never-ensured resource returns [] instead of throwing', async () => {
+    expect(await adapter.query('todos', {})).toEqual([]);
+  });
+
+  it('get on a never-ensured resource returns null instead of throwing', async () => {
+    expect(await adapter.get('todos', 'missing')).toBeNull();
+  });
+
+  it('insert on a never-ensured resource creates the table and round-trips', async () => {
+    const created = await adapter.insert('todos', { id: 't1', title: 'A', done: false });
+    expect(created).toEqual({ id: 't1', title: 'A', done: false });
+    expect(await adapter.get('todos', 't1')).toEqual({ id: 't1', title: 'A', done: false });
+  });
+
+  it('delete on a never-ensured resource is a no-op (does not throw)', async () => {
+    await expect(adapter.delete('todos', 'nope')).resolves.toBeUndefined();
+  });
+});
+
 describe('SqliteAdapter — JSON1 probe', () => {
   it('throws StorageError on first use when json_extract is unavailable', async () => {
     const noJson: SqliteDriver = {

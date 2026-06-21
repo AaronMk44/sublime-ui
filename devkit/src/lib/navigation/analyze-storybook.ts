@@ -60,6 +60,8 @@ function bookToNode(
 
   const format = config ? stringProp(config, 'format') : undefined;
   const pages = config ? objectProp(config, 'pages') : undefined;
+  // A book may set `header: false` as the default for all its pages.
+  const bookHeader = config ? booleanProp(config, 'header') : undefined;
 
   const children: RouteNode[] = [];
   if (pages) {
@@ -74,6 +76,7 @@ function bookToNode(
 
   const node: RouteNode = { key, kind: 'book', options: { ...options }, children };
   if (format !== undefined) node.format = format as PrintFormat;
+  if (bookHeader !== undefined) node.options.header = bookHeader;
   return node;
 }
 
@@ -131,6 +134,8 @@ function optionsFromCall(call: ts.CallExpression, argIndex: number): PageOptions
   if (path !== undefined) options.path = path;
   const initial = booleanProp(arg, 'initial');
   if (initial !== undefined) options.initial = initial;
+  const header = booleanProp(arg, 'header');
+  if (header !== undefined) options.header = header;
   return options;
 }
 
