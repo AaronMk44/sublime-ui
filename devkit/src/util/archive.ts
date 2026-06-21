@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import extract from 'extract-zip';
+import AdmZip from 'adm-zip';
 import { extract as tarExtract } from 'tar';
 
 /** Extracts a .tar.gz/.tgz into `dest` (created if absent). */
@@ -11,7 +11,9 @@ export async function extractTarGz(archive: string, dest: string): Promise<void>
 /** Extracts a .zip into `dest` (created if absent). */
 export async function extractZip(archive: string, dest: string): Promise<void> {
   mkdirSync(dest, { recursive: true });
-  await extract(archive, { dir: dest });
+  // adm-zip is synchronous and resolves reliably across Node versions (the
+  // previous extract-zip returned a promise that never settled on Node 24).
+  new AdmZip(archive).extractAllTo(dest, true);
 }
 
 /** Extracts by extension: .zip → zip, .tar.gz/.tgz → tar. */
