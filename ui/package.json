@@ -1,6 +1,6 @@
 {
   "name": "@sublime-ui/ui",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Cross-platform navigation (storybook → React Navigation / react-router) and layout primitives for Sublime UI.",
   "keywords": [
     "sublime-ui",
@@ -56,7 +56,7 @@
   },
   "peerDependencies": {
     "react": ">=18",
-    "@sublime-ui/library": ">=2.0.0",
+    "@sublime-ui/library": ">=3.0.0",
     "react-native": ">=0.74",
     "@react-navigation/native": ">=6",
     "@react-navigation/native-stack": ">=6",
@@ -92,7 +92,7 @@
     }
   },
   "devDependencies": {
-    "@sublime-ui/library": "^2.0.0",
+    "@sublime-ui/library": "^3.0.0",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/bottom-tabs": "^6.6.1",

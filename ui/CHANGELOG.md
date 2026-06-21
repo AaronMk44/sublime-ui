@@ -1,5 +1,11 @@
 # @sublime-ui/ui
 
+## 3.0.0
+
+### Patch Changes
+
+- @sublime-ui/library@3.0.0
+
 ## 2.0.0
 
 ### Minor Changes

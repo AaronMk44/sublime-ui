@@ -1,6 +1,6 @@
 {
   "name": "@sublime-ui/library",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Tokens-first cross-platform design system — one theme drives MUI (web) and React Native Paper (mobile).",
   "keywords": [
     "sublime-ui",

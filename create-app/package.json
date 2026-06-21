@@ -1,6 +1,6 @@
 {
   "name": "@sublime-ui/create-app",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Scaffold a new Sublime UI app — npm create @sublime-ui/app my-app.",
   "keywords": [
     "sublime-ui",
@@ -35,7 +35,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@sublime-ui/devkit": "^2.0.0"
+    "@sublime-ui/devkit": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^22"
