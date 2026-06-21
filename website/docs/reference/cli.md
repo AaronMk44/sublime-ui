@@ -139,7 +139,7 @@ _Check the Android toolchain (Node, JDK 17, SDK, NDK, CMake)._
 npx sublime setup
 ```
 
-_Install the missing toolchain pieces._
+_Provision the full Android toolchain into `~/.sublime` (fully automatic)._
 
 ```bash
 npx sublime run
@@ -221,10 +221,25 @@ look in one folder.
 
 | Command | What it does |
 | --- | --- |
-| `sublime doctor` | Check the Android toolchain (Node, JDK 17, SDK, NDK, CMake) — a ✓/✗ table. |
-| `sublime setup` | Install missing pieces (Windows: a portable JDK 17; macOS/Linux: guided steps). |
+| `sublime doctor` | Check the Android toolchain (Node, JDK 17, SDK, NDK, CMake) — a ✓/✗ table. Managed pieces show a `(managed)` source. |
+| `sublime setup` | Provision the full Android toolchain into `~/.sublime` — fully automatic on Windows, macOS, and Ubuntu (see below). |
 | `sublime build [--release\|--debug] [--aab] [--project <path>]` | Build a standalone Android APK fully offline → `dist/mobile/`. `--release` (default) embeds the JS bundle; `--debug` needs Metro; `--aab` makes a Play Store bundle. |
 | `sublime run [--device <id>] [--project <path>]` | Install and launch the built APK on a device/emulator. |
+
+#### Environment setup (`sublime setup`)
+
+`sublime setup` installs the full Android toolchain into `~/.sublime`
+(`jdk-17/` and `android-sdk/`) on Windows, macOS, and Linux. It needs no admin
+rights and changes no environment variables — `sublime doctor` and `sublime
+build` find the managed toolchain automatically. Re-running `setup` is safe; it
+resumes from the first missing piece.
+
+It provisions JDK 17, the Android cmdline-tools (with licenses accepted),
+platform-tools, the `android-35` platform, `build-tools;35.0.0`, NDK
+27.1.12297006, and CMake 3.22.1 — showing a download progress bar and numbered
+phases as it goes. `sublime doctor` then reports each managed piece with a
+`(managed)` source, and `sublime build` produces an APK (or `sublime build
+--aab` an AAB) with no further configuration.
 
 ## See also
 

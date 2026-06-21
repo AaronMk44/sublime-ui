@@ -14,8 +14,17 @@ sublime build            # offline release APK (default)
 sublime run              # install + launch the build on a device
 ```
 
-Run `sublime doctor` first if you haven't set up the Android toolchain — see
-[Running on Mobile](./running.md).
+Before your first build, run `sublime setup` once — it downloads and installs
+the JDK, Android SDK, NDK, and CMake under `~/.sublime`. Then `sublime build`
+produces the APK (or `sublime build --aab` for an App Bundle).
+
+```bash
+sublime setup            # one-time: provision the Android toolchain
+```
+
+`sublime setup` is fully automatic on Windows, macOS, and Ubuntu — no admin
+rights and no environment changes. Run `sublime doctor` any time to confirm the
+toolchain is detected — see [Running on Mobile](./running.md).
 
 ## `sublime build`
 

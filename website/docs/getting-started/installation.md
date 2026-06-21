@@ -71,14 +71,17 @@ tells the CLI where your code lives:
 }
 ```
 
-Confirm the CLI sees your project:
+Provision the Android build toolchain (only needed for mobile builds):
 
 ```bash
 npx @sublime-ui/devkit setup
 ```
 
-`sublime setup` prepares the project (installing the package set and wiring the
-config), and `sublime doctor` re-runs the environment checks at any time.
+`sublime setup` installs the full Android toolchain (JDK 17, SDK, NDK, CMake)
+into `~/.sublime` — fully automatic on Windows, macOS, and Ubuntu, with no admin
+rights and no environment changes. Re-running it is safe; it resumes from the
+first missing piece. `sublime doctor` re-runs the environment checks at any time
+and shows each managed piece with a `(managed)` source.
 
 ## A tour of the workspace
 

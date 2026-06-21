@@ -18,7 +18,7 @@ Android APK builds fully offline** (no EAS / cloud build). Bin names: `sublime`
 | Command | What it does |
 |---|---|
 | `sublime doctor` | Prints a ✓/✗ table for Node, JDK 17, `ANDROID_HOME`, cmdline-tools, platform-tools, NDK 27.1.12297006, CMake 3.22.1. Exits non-zero if a required piece is missing. |
-| `sublime setup` | Windows: installs a **portable Temurin JDK 17** into `~/.sublime/` (no admin; your system Java is untouched). macOS/Linux: prints guided steps. |
+| `sublime setup` | Provisions the **full Android toolchain** (JDK 17 + cmdline-tools + licenses + platform-tools + `android-35` + `build-tools;35.0.0` + NDK 27.1.12297006 + CMake 3.22.1) into `~/.sublime/` — fully automatic on Windows, macOS, and Ubuntu. No admin, no Homebrew/apt, and no environment changes; `doctor`/`build` auto-detect it. Safe to re-run (resumes from the first missing piece). |
 | `sublime build [--release\|--debug] [--aab] [--project <path>]` | Runs `expo prebuild` if `android/` is absent, writes `local.properties`, then runs Gradle with a **scoped JDK 17** and self-heals missing NDK/CMake. Default = `assembleRelease`. Note: `--debug` produces a Metro-dependent APK (not offline); `--release` is the offline default. `--aab` produces a Play Store App Bundle (`.aab`, via bundleRelease). |
 | `sublime run [--device <id>] [--project <path>]` | `adb install -r` the APK and launches it. |
 
@@ -63,17 +63,17 @@ Generators never overwrite without `--force`; barrel updates are idempotent.
 
 | Symptom | Fix |
 |---|---|
-| `doctor` shows JDK 17 ✗ | `sublime setup` (Windows) or install Temurin 17 + set `JAVA_HOME`. |
+| `doctor` shows JDK 17 ✗ | Run `sublime setup` — it installs a managed JDK 17 into `~/.sublime/` on any platform. |
 | Build fails on `ndk;…`/`cmake;…` | Usually auto-healed; if it persists, check `ANDROID_HOME` is writable. |
 | `NoClassDefFoundError javax/xml/bind` | You're invoking the legacy `tools/bin/sdkmanager` on JDK 17 — use cmdline-tools `latest`. |
 | `run` finds no device | Start an emulator or plug in a phone with USB debugging; `adb devices`. |
 
 ## Scope
 
-Offline Android builds are Android only (iOS needs macOS). macOS/Linux:
-`doctor`/`build`/`run` work; `setup` prints guided steps instead of
-auto-installing. Generators, `build:nav`, and the desktop commands are
-cross-platform.
+Offline Android builds are Android only (iOS needs macOS). `setup`,
+`doctor`, `build`, and `run` work on Windows, macOS, and Ubuntu — `setup`
+auto-provisions the managed toolchain under `~/.sublime/` on all three.
+Generators, `build:nav`, and the desktop commands are cross-platform.
 
 ## Documentation
 
